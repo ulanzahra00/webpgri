@@ -447,8 +447,7 @@ if ($page === 'profil') {
                     <span class="badge text-bg-light mb-3">Website Resmi Organisasi Profesi Guru</span>
                     <h1 class="display-4">PGRI Kotamobagu</h1>
                     <p class="lead"><?= e(setting('vision')) ?></p>
-                    <a href="<?= e(url('public/?page=profil')) ?>" class="btn btn-light btn-lg me-2">Lihat Profil</a>
-                    <a href="<?= e(url('public/?page=kontak')) ?>" class="btn btn-outline-light btn-lg">Keluhan</a>
+                    <a href="<?= e(url('public/?page=profil')) ?>" class="btn btn-light btn-lg">Lihat Profil</a>
                 </div>
             </div>
         </div>
@@ -459,7 +458,7 @@ if ($page === 'profil') {
             <div class="row g-4 align-items-start mt-2">
                 <div class="col-lg-8">
                     <div class="row g-4">
-                        <?php foreach ($posts as $post): ?><div class="col-md-6 col-xl-4"><article class="card card-official h-100"><?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(post_url($post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><div class="card-body"><span class="badge text-bg-danger mb-2"><?= e($post['category_name']) ?></span><?php if (!empty($post['video'])): ?> <span class="badge text-bg-primary mb-2">Video</span><?php endif; ?><h5><?= e($post['title']) ?></h5><p><?= e($post['excerpt']) ?></p><a class="fw-semibold" href="<?= e(post_url($post['slug'])) ?>">Baca selengkapnya</a></div></article></div><?php endforeach; ?>
+                        <?php foreach ($posts as $post): ?><div class="col-md-6 col-xl-4"><article class="card card-official h-100"><?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(post_url($post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><div class="card-body"><span class="badge text-bg-danger mb-2"><?= e($post['category_name']) ?></span><?php if (!empty($post['video'])): ?> <span class="badge text-bg-primary mb-2">Video</span><?php endif; ?><h5><?= e($post['title']) ?></h5><p class="home-post-excerpt"><?= e($post['excerpt']) ?></p><a class="fw-semibold" href="<?= e(post_url($post['slug'])) ?>">Baca selengkapnya</a></div></article></div><?php endforeach; ?>
                     </div>
                 </div>
                 <div class="col-lg-4">

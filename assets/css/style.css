@@ -160,6 +160,10 @@ a { text-decoration: none; }
   line-height: 1.8;
 }
 
+.home-post-excerpt {
+  text-align: justify;
+}
+
 .latest-posts-sidebar {
   position: sticky;
   top: 96px;
