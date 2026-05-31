@@ -155,6 +155,11 @@ a { text-decoration: none; }
   background: #000;
 }
 
+.post-content {
+  text-align: justify;
+  line-height: 1.8;
+}
+
 .latest-posts-sidebar {
   position: sticky;
   top: 96px;
