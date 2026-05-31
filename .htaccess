@@ -4,6 +4,7 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteRule ^berita/([^/]+)/?$ index.php?page=detail&slug=$1 [L,QSA,B]
   RewriteRule ^public/?$ index.php [L,QSA]
 </IfModule>
 

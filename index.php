@@ -3,6 +3,17 @@
 require_once __DIR__ . '/includes/functions.php';
 
 $page = $_GET['page'] ?? 'home';
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+$basePath = base_path();
+if ($basePath !== '' && str_starts_with($requestPath, $basePath . '/')) {
+    $requestPath = substr($requestPath, strlen($basePath));
+}
+
+if (preg_match('#^/berita/([^/]+)/?$#', $requestPath, $matches)) {
+    $page = 'detail';
+    $_GET['slug'] = rawurldecode($matches[1]);
+}
+
 $pageTitles = [
     'home' => 'Home',
     'profil' => 'Profil',
@@ -20,6 +31,8 @@ $metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi gu
 $metaImage = setting('hero_banner', default_post_image_url());
 $canonicalUrl = current_url();
 $ogType = 'website';
+$articlePublishedTime = null;
+$articleModifiedTime = null;
 $detailPost = null;
 
 if ($page === 'detail') {
@@ -32,7 +45,10 @@ if ($page === 'detail') {
         $metaTitle = $detailPost['title'];
         $metaDescription = $detailPost['excerpt'] ?: $detailPost['content'];
         $metaImage = has_custom_post_image($detailPost['image']) ? $detailPost['image'] : $metaImage;
+        $canonicalUrl = absolute_url(post_url($detailPost['slug']));
         $ogType = 'article';
+        $articlePublishedTime = !empty($detailPost['published_at']) ? date(DATE_ATOM, strtotime($detailPost['published_at'])) : null;
+        $articleModifiedTime = !empty($detailPost['updated_at']) ? date(DATE_ATOM, strtotime($detailPost['updated_at'])) : $articlePublishedTime;
     }
 }
 
@@ -55,7 +71,7 @@ function render_latest_posts_sidebar(?string $currentSlug = null): void
             }
             $shown++;
             ?>
-            <a class="latest-post-item" href="<?= e(url('public/?page=detail&slug=' . $latestPost['slug'])) ?>">
+            <a class="latest-post-item" href="<?= e(post_url($latestPost['slug'])) ?>">
                 <?php if (has_custom_post_image($latestPost['image'])): ?>
                     <img loading="lazy" src="<?= e(media_url($latestPost['image'])) ?>" alt="<?= e($latestPost['title']) ?>">
                 <?php else: ?>
@@ -128,13 +144,13 @@ if ($page === 'profil') {
                         <?php foreach ($posts as $post): ?>
                             <div class="col-md-6">
                                 <article class="card card-official h-100">
-                                    <?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(url('public/?page=detail&slug=' . $post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?>
+                                    <?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(post_url($post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?>
                                     <div class="card-body">
                                         <span class="badge text-bg-danger mb-2"><?= e($post['category_name']) ?></span>
                                         <?php if (!empty($post['video'])): ?><span class="badge text-bg-primary mb-2">Video</span><?php endif; ?>
                                         <h5><?= e($post['title']) ?></h5>
                                         <p><?= e($post['excerpt']) ?></p>
-                                        <a class="fw-semibold" href="<?= e(url('public/?page=detail&slug=' . $post['slug'])) ?>">Baca selengkapnya</a>
+                                        <a class="fw-semibold" href="<?= e(post_url($post['slug'])) ?>">Baca selengkapnya</a>
                                     </div>
                                 </article>
                             </div>
@@ -441,7 +457,7 @@ if ($page === 'profil') {
             <div class="row g-4 align-items-start mt-2">
                 <div class="col-lg-8">
                     <div class="row g-4">
-                        <?php foreach ($posts as $post): ?><div class="col-md-6 col-xl-4"><article class="card card-official h-100"><?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(url('public/?page=detail&slug=' . $post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><div class="card-body"><span class="badge text-bg-danger mb-2"><?= e($post['category_name']) ?></span><?php if (!empty($post['video'])): ?> <span class="badge text-bg-primary mb-2">Video</span><?php endif; ?><h5><?= e($post['title']) ?></h5><p><?= e($post['excerpt']) ?></p><a class="fw-semibold" href="<?= e(url('public/?page=detail&slug=' . $post['slug'])) ?>">Baca selengkapnya</a></div></article></div><?php endforeach; ?>
+                        <?php foreach ($posts as $post): ?><div class="col-md-6 col-xl-4"><article class="card card-official h-100"><?php if (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(post_url($post['slug'])) ?>"><img loading="lazy" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><div class="card-body"><span class="badge text-bg-danger mb-2"><?= e($post['category_name']) ?></span><?php if (!empty($post['video'])): ?> <span class="badge text-bg-primary mb-2">Video</span><?php endif; ?><h5><?= e($post['title']) ?></h5><p><?= e($post['excerpt']) ?></p><a class="fw-semibold" href="<?= e(post_url($post['slug'])) ?>">Baca selengkapnya</a></div></article></div><?php endforeach; ?>
                     </div>
                 </div>
                 <div class="col-lg-4">

@@ -56,9 +56,22 @@ function url(string $path = ''): string
     return (base_path() === '' ? '' : base_path()) . '/' . ltrim($path, '/');
 }
 
+function request_scheme(): string
+{
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+        return strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https' ? 'https' : 'http';
+    }
+
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return 'https';
+    }
+
+    return 'http';
+}
+
 function current_url(): string
 {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $scheme = request_scheme();
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $requestUri = $_SERVER['REQUEST_URI'] ?? url('public/');
 
@@ -76,13 +89,18 @@ function absolute_url(string $path): string
     }
 
     if (str_starts_with($path, '//')) {
-        return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https:' : 'http:') . $path;
+        return request_scheme() . ':' . $path;
     }
 
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $scheme = request_scheme();
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
     return $scheme . '://' . $host . '/' . ltrim($path, '/');
+}
+
+function post_url(string $slug): string
+{
+    return url('berita/' . rawurlencode($slug));
 }
 
 function media_url(?string $path): string

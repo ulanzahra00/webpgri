@@ -40,6 +40,12 @@ $ogType = $ogType ?? 'website';
         <meta property="og:image:width" content="<?= e((string)$metaImageDimensions['width']) ?>">
         <meta property="og:image:height" content="<?= e((string)$metaImageDimensions['height']) ?>">
     <?php endif; ?>
+    <?php if ($ogType === 'article' && !empty($articlePublishedTime)): ?>
+        <meta property="article:published_time" content="<?= e($articlePublishedTime) ?>">
+    <?php endif; ?>
+    <?php if ($ogType === 'article' && !empty($articleModifiedTime)): ?>
+        <meta property="article:modified_time" content="<?= e($articleModifiedTime) ?>">
+    <?php endif; ?>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= e($metaTitle) ?>">
     <meta name="twitter:description" content="<?= e($metaDescription) ?>">
