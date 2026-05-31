@@ -124,6 +124,25 @@ function media_dimensions(?string $path): array
     return ['width' => (int)$size[0], 'height' => (int)$size[1]];
 }
 
+function media_mime_type(?string $path): string
+{
+    if ($path === null || $path === '') {
+        return '';
+    }
+
+    $imagePath = parse_url($path, PHP_URL_PATH) ?: $path;
+    $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'webp' => 'image/webp',
+        'gif' => 'image/gif',
+    ];
+
+    return $mimeTypes[$extension] ?? '';
+}
+
 function meta_description(?string $value, int $limit = 180): string
 {
     $description = trim(preg_replace('/\s+/', ' ', strip_tags($value ?? '')));

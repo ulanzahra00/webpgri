@@ -15,6 +15,7 @@ $pageTitles = [
     'kontak' => 'Keluhan',
 ];
 $pageTitle = $pageTitles[$page] ?? ucfirst($page);
+$metaTitle = $pageTitle . ' - ' . setting('site_name', 'PGRI Kotamobagu');
 $metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
 $metaImage = setting('hero_banner', default_post_image_url());
 $canonicalUrl = current_url();
@@ -28,6 +29,7 @@ if ($page === 'detail') {
 
     if ($detailPost) {
         $pageTitle = $detailPost['title'];
+        $metaTitle = $detailPost['title'];
         $metaDescription = $detailPost['excerpt'] ?: $detailPost['content'];
         $metaImage = has_custom_post_image($detailPost['image']) ? $detailPost['image'] : $metaImage;
         $ogType = 'article';

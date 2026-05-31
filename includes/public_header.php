@@ -4,9 +4,11 @@ $pageTitle = $pageTitle ?? setting('site_name', 'PGRI Kotamobagu');
 $siteName = setting('site_name', 'PGRI Kotamobagu');
 $siteLogo = setting('site_logo');
 $heroBanner = setting('hero_banner', 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');
+$metaTitle = $metaTitle ?? $pageTitle;
 $metaDescription = meta_description($metaDescription ?? null);
 $rawMetaImage = $metaImage ?? ($siteLogo ?: $heroBanner);
 $metaImageDimensions = media_dimensions($rawMetaImage);
+$metaImageType = media_mime_type($rawMetaImage);
 $metaImage = media_absolute_url($rawMetaImage);
 $canonicalUrl = $canonicalUrl ?? current_url();
 $ogType = $ogType ?? 'website';
@@ -23,18 +25,23 @@ $ogType = $ogType ?? 'website';
     <meta property="og:locale" content="id_ID">
     <meta property="og:type" content="<?= e($ogType) ?>">
     <meta property="og:site_name" content="<?= e($siteName) ?>">
-    <meta property="og:title" content="<?= e($pageTitle) ?> - <?= e($siteName) ?>">
+    <meta property="og:title" content="<?= e($metaTitle) ?>">
     <meta property="og:description" content="<?= e($metaDescription) ?>">
     <meta property="og:url" content="<?= e($canonicalUrl) ?>">
     <meta property="og:image" content="<?= e($metaImage) ?>">
-    <meta property="og:image:secure_url" content="<?= e(preg_replace('#^http://#', 'https://', $metaImage)) ?>">
-    <meta property="og:image:alt" content="<?= e($pageTitle) ?>">
+    <?php if (str_starts_with($metaImage, 'https://')): ?>
+        <meta property="og:image:secure_url" content="<?= e($metaImage) ?>">
+    <?php endif; ?>
+    <?php if ($metaImageType): ?>
+        <meta property="og:image:type" content="<?= e($metaImageType) ?>">
+    <?php endif; ?>
+    <meta property="og:image:alt" content="<?= e($metaTitle) ?>">
     <?php if ($metaImageDimensions): ?>
         <meta property="og:image:width" content="<?= e((string)$metaImageDimensions['width']) ?>">
         <meta property="og:image:height" content="<?= e((string)$metaImageDimensions['height']) ?>">
     <?php endif; ?>
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?= e($pageTitle) ?> - <?= e($siteName) ?>">
+    <meta name="twitter:title" content="<?= e($metaTitle) ?>">
     <meta name="twitter:description" content="<?= e($metaDescription) ?>">
     <meta name="twitter:image" content="<?= e($metaImage) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
