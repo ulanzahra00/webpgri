@@ -1,9 +1,9 @@
 <?php
 // Konfigurasi koneksi database MySQL menggunakan PDO.
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'pgri_kotamobagu');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_NAME', getenv('DB_NAME') ?: 'pgrikota_pgri');
+define('DB_USER', getenv('DB_USER') ?: 'pgrikota_pgri');
+define('DB_PASS', getenv('DB_PASS') ?: 'tanyap4ZIL');
 
 function db(): PDO
 {
