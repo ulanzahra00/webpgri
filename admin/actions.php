@@ -6,6 +6,13 @@ require_admin();
 $module = $_POST['module'] ?? $_GET['module'] ?? '';
 $action = $_POST['action'] ?? $_GET['action'] ?? 'save';
 
+if (request_exceeds_post_max_size()) {
+    $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+    $postMaxSize = ini_size_to_bytes((string)ini_get('post_max_size'));
+    flash('danger', 'Upload terlalu besar untuk konfigurasi server saat ini. Ukuran kiriman sekitar ' . format_bytes($contentLength) . ', sedangkan post_max_size server ' . format_bytes($postMaxSize) . '. Naikkan post_max_size minimal 110M.');
+    redirect($_SERVER['HTTP_REFERER'] ?? 'admin/?module=posts');
+}
+
 if ($module === 'member_registrations') {
     ensure_member_registrations_table();
 }

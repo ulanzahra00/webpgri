@@ -283,6 +283,54 @@ function verify_csrf(): void
     }
 }
 
+function ini_size_to_bytes(string $value): int
+{
+    $value = trim($value);
+    if ($value === '') {
+        return 0;
+    }
+
+    $unit = strtolower($value[strlen($value) - 1]);
+    $bytes = (float)$value;
+
+    if ($unit === 'g') {
+        $bytes *= 1024;
+    }
+    if ($unit === 'g' || $unit === 'm') {
+        $bytes *= 1024;
+    }
+    if ($unit === 'g' || $unit === 'm' || $unit === 'k') {
+        $bytes *= 1024;
+    }
+
+    return (int)$bytes;
+}
+
+function format_bytes(int $bytes): string
+{
+    if ($bytes >= 1024 * 1024) {
+        return round($bytes / 1024 / 1024) . 'MB';
+    }
+
+    if ($bytes >= 1024) {
+        return round($bytes / 1024) . 'KB';
+    }
+
+    return $bytes . 'B';
+}
+
+function request_exceeds_post_max_size(): bool
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        return false;
+    }
+
+    $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+    $postMaxSize = ini_size_to_bytes((string)ini_get('post_max_size'));
+
+    return $contentLength > 0 && $postMaxSize > 0 && $contentLength > $postMaxSize;
+}
+
 function ensure_posts_video_column(): void
 {
     static $checked = false;
