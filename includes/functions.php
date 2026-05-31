@@ -156,6 +156,7 @@ function media_mime_type(?string $path): string
         'png' => 'image/png',
         'webp' => 'image/webp',
         'gif' => 'image/gif',
+        'mp4' => 'video/mp4',
     ];
 
     return $mimeTypes[$extension] ?? '';

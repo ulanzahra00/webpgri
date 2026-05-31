@@ -29,6 +29,7 @@ $pageTitle = $pageTitles[$page] ?? ucfirst($page);
 $metaTitle = $pageTitle . ' - ' . setting('site_name', 'PGRI Kotamobagu');
 $metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
 $metaImage = setting('hero_banner', default_post_image_url());
+$metaVideo = '';
 $canonicalUrl = current_url();
 $ogType = 'website';
 $articlePublishedTime = null;
@@ -45,6 +46,7 @@ if ($page === 'detail') {
         $metaTitle = $detailPost['title'];
         $metaDescription = $detailPost['excerpt'] ?: $detailPost['content'];
         $metaImage = has_custom_post_image($detailPost['image']) ? $detailPost['image'] : $metaImage;
+        $metaVideo = !empty($detailPost['video']) ? $detailPost['video'] : '';
         $canonicalUrl = absolute_url(post_url($detailPost['slug']));
         $ogType = 'article';
         $articlePublishedTime = !empty($detailPost['published_at']) ? date(DATE_ATOM, strtotime($detailPost['published_at'])) : null;

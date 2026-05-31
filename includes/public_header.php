@@ -10,6 +10,9 @@ $rawMetaImage = $metaImage ?? ($siteLogo ?: $heroBanner);
 $metaImageDimensions = media_dimensions($rawMetaImage);
 $metaImageType = media_mime_type($rawMetaImage);
 $metaImage = media_absolute_url($rawMetaImage);
+$rawMetaVideo = $metaVideo ?? '';
+$metaVideo = media_absolute_url($rawMetaVideo);
+$metaVideoType = $metaVideo ? (media_mime_type($rawMetaVideo) ?: 'video/mp4') : '';
 $canonicalUrl = $canonicalUrl ?? current_url();
 $ogType = $ogType ?? 'website';
 ?>
@@ -29,6 +32,7 @@ $ogType = $ogType ?? 'website';
     <meta property="og:description" content="<?= e($metaDescription) ?>">
     <meta property="og:url" content="<?= e($canonicalUrl) ?>">
     <meta property="og:image" content="<?= e($metaImage) ?>">
+    <meta property="og:image:url" content="<?= e($metaImage) ?>">
     <?php if (str_starts_with($metaImage, 'https://')): ?>
         <meta property="og:image:secure_url" content="<?= e($metaImage) ?>">
     <?php endif; ?>
@@ -40,6 +44,13 @@ $ogType = $ogType ?? 'website';
         <meta property="og:image:width" content="<?= e((string)$metaImageDimensions['width']) ?>">
         <meta property="og:image:height" content="<?= e((string)$metaImageDimensions['height']) ?>">
     <?php endif; ?>
+    <?php if ($metaVideo): ?>
+        <meta property="og:video" content="<?= e($metaVideo) ?>">
+        <?php if (str_starts_with($metaVideo, 'https://')): ?>
+            <meta property="og:video:secure_url" content="<?= e($metaVideo) ?>">
+        <?php endif; ?>
+        <meta property="og:video:type" content="<?= e($metaVideoType) ?>">
+    <?php endif; ?>
     <?php if ($ogType === 'article' && !empty($articlePublishedTime)): ?>
         <meta property="article:published_time" content="<?= e($articlePublishedTime) ?>">
     <?php endif; ?>
@@ -50,6 +61,7 @@ $ogType = $ogType ?? 'website';
     <meta name="twitter:title" content="<?= e($metaTitle) ?>">
     <meta name="twitter:description" content="<?= e($metaDescription) ?>">
     <meta name="twitter:image" content="<?= e($metaImage) ?>">
+    <meta itemprop="image" content="<?= e($metaImage) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= e(asset_url('assets/css/style.css')) ?>" rel="stylesheet">
