@@ -551,8 +551,8 @@ function upload_video(array $file, string $folder): ?string
         return null;
     }
 
-    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 50 * 1024 * 1024) {
-        throw new RuntimeException('Upload gagal atau ukuran video melebihi 50MB.');
+    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 100 * 1024 * 1024) {
+        throw new RuntimeException('Upload gagal atau ukuran video melebihi 100MB.');
     }
 
     $allowed = ['video/mp4' => 'mp4', 'application/mp4' => 'mp4'];
