@@ -319,6 +319,42 @@ function format_bytes(int $bytes): string
     return $bytes . 'B';
 }
 
+function uploaded_file_mime(array $file): string
+{
+    $tmpName = $file['tmp_name'] ?? '';
+    if ($tmpName !== '' && function_exists('mime_content_type')) {
+        $mime = mime_content_type($tmpName);
+        if (is_string($mime) && $mime !== '') {
+            return $mime;
+        }
+    }
+
+    if ($tmpName !== '' && function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mime = finfo_file($finfo, $tmpName);
+            finfo_close($finfo);
+            if (is_string($mime) && $mime !== '') {
+                return $mime;
+            }
+        }
+    }
+
+    $extension = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'webp' => 'image/webp',
+        'mp4' => 'video/mp4',
+        'pdf' => 'application/pdf',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+
+    return $mimeTypes[$extension] ?? 'application/octet-stream';
+}
+
 function request_exceeds_post_max_size(): bool
 {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -574,7 +610,7 @@ function upload_image(array $file, string $folder): ?string
     }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime = mime_content_type($file['tmp_name']);
+    $mime = uploaded_file_mime($file);
     if (!isset($allowed[$mime])) {
         throw new RuntimeException('Format gambar harus JPG, PNG, atau WEBP.');
     }
@@ -604,7 +640,7 @@ function upload_video(array $file, string $folder): ?string
     }
 
     $allowed = ['video/mp4' => 'mp4', 'application/mp4' => 'mp4'];
-    $mime = mime_content_type($file['tmp_name']);
+    $mime = uploaded_file_mime($file);
     if (!isset($allowed[$mime])) {
         throw new RuntimeException('Format video harus MP4.');
     }
@@ -638,7 +674,7 @@ function upload_document(array $file, string $folder): ?string
         'application/vnd.ms-excel' => 'xls',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
     ];
-    $mime = mime_content_type($file['tmp_name']);
+    $mime = uploaded_file_mime($file);
     if (!isset($allowed[$mime])) {
         throw new RuntimeException('Dokumen laporan harus PDF, XLS, atau XLSX.');
     }
