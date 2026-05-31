@@ -1,0 +1,21 @@
+# Rewrite dasar untuk shared hosting Apache.
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^public/?$ index.php [L,QSA]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+<FilesMatch "\.(sql|md)$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "^(install|update_finance|update_posts_video)\.php$">
+  Require all denied
+</FilesMatch>
