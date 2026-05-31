@@ -56,6 +56,35 @@ function url(string $path = ''): string
     return (base_path() === '' ? '' : base_path()) . '/' . ltrim($path, '/');
 }
 
+function current_url(): string
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? url('public/');
+
+    return $scheme . '://' . $host . $requestUri;
+}
+
+function absolute_url(string $path): string
+{
+    if ($path === '') {
+        return '';
+    }
+
+    if (preg_match('#^https?://#', $path)) {
+        return $path;
+    }
+
+    if (str_starts_with($path, '//')) {
+        return ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https:' : 'http:') . $path;
+    }
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    return $scheme . '://' . $host . '/' . ltrim($path, '/');
+}
+
 function media_url(?string $path): string
 {
     if ($path === null || $path === '') {
@@ -63,6 +92,46 @@ function media_url(?string $path): string
     }
 
     return url($path);
+}
+
+function media_absolute_url(?string $path): string
+{
+    return absolute_url(media_url($path));
+}
+
+function media_dimensions(?string $path): array
+{
+    if ($path === null || $path === '' || preg_match('#^(https?:)?//#', $path)) {
+        return [];
+    }
+
+    $imagePath = parse_url($path, PHP_URL_PATH) ?: '';
+    $basePath = base_path();
+    if ($basePath !== '' && str_starts_with($imagePath, $basePath . '/')) {
+        $imagePath = substr($imagePath, strlen($basePath));
+    }
+
+    $filePath = __DIR__ . '/../' . ltrim($imagePath, '/');
+    if (!is_file($filePath)) {
+        return [];
+    }
+
+    $size = getimagesize($filePath);
+    if ($size === false) {
+        return [];
+    }
+
+    return ['width' => (int)$size[0], 'height' => (int)$size[1]];
+}
+
+function meta_description(?string $value, int $limit = 180): string
+{
+    $description = trim(preg_replace('/\s+/', ' ', strip_tags($value ?? '')));
+    if ($description === '') {
+        return 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
+    }
+
+    return mb_strlen($description) > $limit ? mb_substr($description, 0, $limit - 3) . '...' : $description;
 }
 
 function asset_url(string $path): string

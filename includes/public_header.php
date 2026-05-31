@@ -4,16 +4,39 @@ $pageTitle = $pageTitle ?? setting('site_name', 'PGRI Kotamobagu');
 $siteName = setting('site_name', 'PGRI Kotamobagu');
 $siteLogo = setting('site_logo');
 $heroBanner = setting('hero_banner', 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');
+$metaDescription = meta_description($metaDescription ?? null);
+$rawMetaImage = $metaImage ?? ($siteLogo ?: $heroBanner);
+$metaImageDimensions = media_dimensions($rawMetaImage);
+$metaImage = media_absolute_url($rawMetaImage);
+$canonicalUrl = $canonicalUrl ?? current_url();
+$ogType = $ogType ?? 'website';
 ?>
 <!doctype html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.">
+    <meta name="description" content="<?= e($metaDescription) ?>">
     <meta name="keywords" content="PGRI Kotamobagu, guru, pendidikan, organisasi, sekolah">
     <title><?= e($pageTitle) ?> - <?= e($siteName) ?></title>
-    <link rel="canonical" href="<?= e(url('public/')) ?>">
+    <link rel="canonical" href="<?= e($canonicalUrl) ?>">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:type" content="<?= e($ogType) ?>">
+    <meta property="og:site_name" content="<?= e($siteName) ?>">
+    <meta property="og:title" content="<?= e($pageTitle) ?> - <?= e($siteName) ?>">
+    <meta property="og:description" content="<?= e($metaDescription) ?>">
+    <meta property="og:url" content="<?= e($canonicalUrl) ?>">
+    <meta property="og:image" content="<?= e($metaImage) ?>">
+    <meta property="og:image:secure_url" content="<?= e(preg_replace('#^http://#', 'https://', $metaImage)) ?>">
+    <meta property="og:image:alt" content="<?= e($pageTitle) ?>">
+    <?php if ($metaImageDimensions): ?>
+        <meta property="og:image:width" content="<?= e((string)$metaImageDimensions['width']) ?>">
+        <meta property="og:image:height" content="<?= e((string)$metaImageDimensions['height']) ?>">
+    <?php endif; ?>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= e($pageTitle) ?> - <?= e($siteName) ?>">
+    <meta name="twitter:description" content="<?= e($metaDescription) ?>">
+    <meta name="twitter:image" content="<?= e($metaImage) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <link href="<?= e(asset_url('assets/css/style.css')) ?>" rel="stylesheet">

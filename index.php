@@ -3,7 +3,37 @@
 require_once __DIR__ . '/includes/functions.php';
 
 $page = $_GET['page'] ?? 'home';
-$pageTitle = ucfirst($page);
+$pageTitles = [
+    'home' => 'Home',
+    'profil' => 'Profil',
+    'berita' => 'Berita & Artikel',
+    'detail' => 'Berita',
+    'sekolah' => 'Data Sekolah',
+    'anggota' => 'Anggota',
+    'keuangan' => 'Keuangan',
+    'galeri' => 'Galeri Kegiatan',
+    'kontak' => 'Keluhan',
+];
+$pageTitle = $pageTitles[$page] ?? ucfirst($page);
+$metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
+$metaImage = setting('hero_banner', default_post_image_url());
+$canonicalUrl = current_url();
+$ogType = 'website';
+$detailPost = null;
+
+if ($page === 'detail') {
+    $stmt = db()->prepare('SELECT posts.*, categories.name AS category_name FROM posts LEFT JOIN categories ON categories.id = posts.category_id WHERE posts.slug = ? AND status = "published" LIMIT 1');
+    $stmt->execute([$_GET['slug'] ?? '']);
+    $detailPost = $stmt->fetch() ?: null;
+
+    if ($detailPost) {
+        $pageTitle = $detailPost['title'];
+        $metaDescription = $detailPost['excerpt'] ?: $detailPost['content'];
+        $metaImage = has_custom_post_image($detailPost['image']) ? $detailPost['image'] : $metaImage;
+        $ogType = 'article';
+    }
+}
+
 require_once __DIR__ . '/includes/public_header.php';
 
 function render_latest_posts_sidebar(?string $currentSlug = null): void
@@ -122,9 +152,7 @@ if ($page === 'profil') {
     </section>
     <?php
 } elseif ($page === 'detail') {
-    $stmt = db()->prepare('SELECT posts.*, categories.name AS category_name FROM posts LEFT JOIN categories ON categories.id = posts.category_id WHERE posts.slug = ? AND status = "published" LIMIT 1');
-    $stmt->execute([$_GET['slug'] ?? '']);
-    $post = $stmt->fetch();
+    $post = $detailPost;
     if (!$post) { echo '<main class="section-band"><div class="container"><h1>Berita tidak ditemukan</h1></div></main>'; }
     else { ?>
         <header class="page-header page-header-news"><div class="container"><span class="badge text-bg-light mb-3"><?= e($post['category_name']) ?></span><h1><?= e($post['title']) ?></h1></div></header>
