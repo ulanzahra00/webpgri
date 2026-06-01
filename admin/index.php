@@ -75,7 +75,7 @@ if ($module === 'dashboard') {
                 <div class="col-md-4"><label class="form-label">Kategori</label><select class="form-select" name="category_id"><?php foreach ($categories as $cat): ?><option value="<?= e($cat['id']) ?>" <?= (int)$post['category_id'] === (int)$cat['id'] ? 'selected' : '' ?>><?= e($cat['name']) ?></option><?php endforeach; ?></select></div>
                 <div class="col-12"><label class="form-label">Ringkasan</label><textarea class="form-control" name="excerpt" rows="2"><?= e($post['excerpt']) ?></textarea></div>
                 <div class="col-12"><label class="form-label">Konten</label><textarea class="form-control" name="content" rows="8" required><?= e($post['content']) ?></textarea></div>
-                <div class="col-md-6"><label class="form-label">Gambar</label><input class="form-control" type="file" name="image" accept="image/*"><small class="text-muted">Kosongkan jika tidak mengganti.</small></div>
+                <div class="col-md-6"><label class="form-label">Gambar</label><input class="form-control" type="file" name="image" accept="image/*"><small class="text-muted">Maksimal 5MB. Kosongkan jika tidak mengganti.</small></div>
                 <div class="col-md-6"><label class="form-label">Video MP4</label><input class="form-control" type="file" name="video" accept="video/mp4,.mp4"><small class="text-muted">Opsional, maksimal 100MB. Kosongkan jika tidak mengganti.</small><?php if (!empty($post['video'])): ?><div class="mt-2"><a href="<?= e(media_url($post['video'])) ?>" target="_blank">Lihat video saat ini</a></div><?php endif; ?></div>
                 <div class="col-md-3"><label class="form-label">Status</label><select class="form-select" name="status"><option value="published">Published</option><option value="draft" <?= $post['status'] === 'draft' ? 'selected' : '' ?>>Draft</option></select></div>
             </div>
@@ -101,7 +101,7 @@ if ($module === 'dashboard') {
             <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>"><input type="hidden" name="module" value="galleries"><input type="hidden" name="id" value="<?= e($row['id']) ?>">
             <div class="mb-3"><label class="form-label">Judul</label><input class="form-control" name="title" value="<?= e($row['title']) ?>" required></div>
             <div class="mb-3"><label class="form-label">Deskripsi</label><textarea class="form-control" name="description"><?= e($row['description']) ?></textarea></div>
-            <div class="row g-3"><div class="col-md-6"><label class="form-label">Tanggal</label><input class="form-control" type="date" name="event_date" value="<?= e($row['event_date']) ?>"></div><div class="col-md-6"><label class="form-label">Gambar</label><input class="form-control" type="file" name="image" accept="image/*" <?= $id ? '' : 'required' ?>></div></div>
+            <div class="row g-3"><div class="col-md-6"><label class="form-label">Tanggal</label><input class="form-control" type="date" name="event_date" value="<?= e($row['event_date']) ?>"></div><div class="col-md-6"><label class="form-label">Gambar</label><input class="form-control" type="file" name="image" accept="image/*" <?= $id ? '' : 'required' ?>><small class="text-muted">Maksimal 5MB. Kosongkan jika tidak mengganti.</small></div></div>
             <button class="btn btn-pgri mt-4">Simpan</button>
         </form>
         <?php

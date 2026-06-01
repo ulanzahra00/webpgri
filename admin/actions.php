@@ -96,7 +96,7 @@ try {
 
         $id = (int)($_POST['id'] ?? 0);
         $title = trim($_POST['title'] ?? '');
-        $image = upload_image($_FILES['image'] ?? [], 'berita');
+        $image = upload_image($_FILES['image'] ?? [], 'berita', 5 * 1024 * 1024);
         $video = upload_video($_FILES['video'] ?? [], 'berita');
 
         if ($id) {
@@ -117,7 +117,7 @@ try {
 
     if ($module === 'galleries') {
         $id = (int)($_POST['id'] ?? 0);
-        $image = upload_image($_FILES['image'] ?? [], 'galeri');
+        $image = upload_image($_FILES['image'] ?? [], 'galeri', 5 * 1024 * 1024);
         if ($id) {
             $old = db()->prepare('SELECT image FROM galleries WHERE id = ?');
             $old->execute([$id]);

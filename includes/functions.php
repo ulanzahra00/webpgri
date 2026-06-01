@@ -599,14 +599,15 @@ function read_school_import_file(array $file): array
     throw new RuntimeException('Format file harus CSV atau XLSX.');
 }
 
-function upload_image(array $file, string $folder): ?string
+function upload_image(array $file, string $folder, int $maxSizeBytes = 2097152): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
         return null;
     }
 
-    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 2 * 1024 * 1024) {
-        throw new RuntimeException('Upload gagal atau ukuran file melebihi 2MB.');
+    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > $maxSizeBytes) {
+        $maxSizeMb = (int)ceil($maxSizeBytes / 1024 / 1024);
+        throw new RuntimeException('Upload gagal atau ukuran file melebihi ' . $maxSizeMb . 'MB.');
     }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
