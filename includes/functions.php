@@ -502,6 +502,52 @@ function save_compressed_jpeg(string $sourcePath, string $targetPath, string $mi
     return false;
 }
 
+function php_size_to_bytes(string $value): int
+{
+    $value = trim($value);
+    if ($value === '') {
+        return 0;
+    }
+
+    $unit = strtolower(substr($value, -1));
+    $number = (float)$value;
+    if ($unit === 'g') {
+        return (int)($number * 1024 * 1024 * 1024);
+    }
+
+    if ($unit === 'm') {
+        return (int)($number * 1024 * 1024);
+    }
+
+    if ($unit === 'k') {
+        return (int)($number * 1024);
+    }
+
+    return (int)$number;
+}
+
+function format_bytes_as_mb(int $bytes): string
+{
+    if ($bytes <= 0) {
+        return 'tidak diketahui';
+    }
+
+    $megabytes = $bytes / 1024 / 1024;
+    return rtrim(rtrim(number_format($megabytes, 2, ',', ''), '0'), ',') . 'MB';
+}
+
+function current_php_upload_limit(): int
+{
+    $uploadLimit = php_size_to_bytes((string)ini_get('upload_max_filesize'));
+    $postLimit = php_size_to_bytes((string)ini_get('post_max_size'));
+
+    if ($uploadLimit > 0 && $postLimit > 0) {
+        return min($uploadLimit, $postLimit);
+    }
+
+    return max($uploadLimit, $postLimit);
+}
+
 function upload_image(array $file, string $folder, int $maxBytes = 2097152, ?int $sourceMaxBytes = null): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -512,8 +558,13 @@ function upload_image(array $file, string $folder, int $maxBytes = 2097152, ?int
     $sourceLimit = $sourceMaxBytes ?? $maxBytes;
     $sourceMaxMegabytes = (int)ceil($sourceLimit / 1024 / 1024);
     $error = (int)($file['error'] ?? UPLOAD_ERR_OK);
-    if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-        throw new RuntimeException('Ukuran file melebihi batas server. Maksimal file awal ' . $sourceMaxMegabytes . 'MB.');
+    if ($error === UPLOAD_ERR_INI_SIZE) {
+        $serverLimit = current_php_upload_limit();
+        throw new RuntimeException('File ditolak oleh batas upload server saat ini (' . format_bytes_as_mb($serverLimit) . '). Kompresi otomatis baru bisa berjalan jika file berhasil diterima server. Naikkan upload_max_filesize dan post_max_size minimal ' . $sourceMaxMegabytes . 'MB di hosting.');
+    }
+
+    if ($error === UPLOAD_ERR_FORM_SIZE) {
+        throw new RuntimeException('Ukuran file awal melebihi ' . $sourceMaxMegabytes . 'MB.');
     }
 
     if ($error !== UPLOAD_ERR_OK) {
