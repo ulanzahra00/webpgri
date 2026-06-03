@@ -1,0 +1,22 @@
+# Rewrite dasar untuk shared hosting Apache.
+DirectoryIndex index.php
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Versi lama pernah memakai /public/. Di hosting root domain, arahkan ke URL utama.
+  RewriteCond %{THE_REQUEST} \s/+public/?[?\s] [NC]
+  RewriteRule ^public/?$ / [R=301,L]
+
+  RewriteRule ^public/?$ index.php [L,QSA]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+<FilesMatch "\.(sql|md|env|ini|log|yml|yaml)$">
+  Require all denied
+</FilesMatch>

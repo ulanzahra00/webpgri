@@ -1,0 +1,9 @@
+# File upload user dan konfigurasi lokal.
+uploads/berita/*
+uploads/galeri/*
+uploads/pengurus/*
+uploads/keuangan/*
+!uploads/**/.gitkeep
+
+.env
+*.log

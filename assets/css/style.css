@@ -1,0 +1,450 @@
+/* Tema resmi PGRI Kotamobagu: nuansa hijau dengan aksen emas pendidikan. */
+:root {
+  --pgri-red: #138a3d;
+  --pgri-red-dark: #0d6b2f;
+  --pgri-blue: #0f766e;
+  --pgri-navy: #0f3d2e;
+  --pgri-gold: #d9a441;
+  --soft-bg: #f0f7f2;
+  --text: #20382e;
+}
+
+body {
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #fff;
+}
+
+a { text-decoration: none; }
+
+.btn-outline-primary {
+  color: var(--pgri-red);
+  border-color: var(--pgri-red);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background: var(--pgri-red);
+  border-color: var(--pgri-red);
+  color: #fff;
+}
+
+.page-item.active .page-link {
+  background: var(--pgri-red);
+  border-color: var(--pgri-red);
+}
+
+.page-link {
+  color: var(--pgri-red);
+}
+
+.text-bg-danger {
+  background-color: var(--pgri-red) !important;
+}
+
+.text-bg-primary {
+  background-color: var(--pgri-blue) !important;
+}
+
+.top-strip {
+  background: var(--pgri-navy);
+  color: #fff;
+  font-size: .9rem;
+}
+
+.logo-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--pgri-red), var(--pgri-blue));
+  color: #fff;
+}
+
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.main-navbar {
+  box-shadow: 0 8px 30px rgba(15, 61, 46, .08);
+}
+
+.hero {
+  min-height: auto;
+  padding: 48px 0 32px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(15, 61, 46, .92), rgba(19, 138, 61, .74)),
+    url("https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80") center/cover;
+}
+
+.hero h1 {
+  font-size: 2.35rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.hero .badge {
+  margin-bottom: .5rem !important;
+}
+
+.hero .lead {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.hero .btn-lg {
+  padding: .5rem 1rem;
+  font-size: 1rem;
+}
+
+.section-band {
+  padding: 76px 0;
+}
+
+.section-soft {
+  background: var(--soft-bg);
+}
+
+.section-title {
+  color: var(--pgri-navy);
+  font-weight: 800;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 6px;
+  background: var(--pgri-red);
+}
+
+.card-official {
+  border: 1px solid rgba(19, 138, 61, .12);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(15, 61, 46, .08);
+  overflow: hidden;
+}
+
+.card-official img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.post-image-link {
+  display: block;
+  cursor: pointer;
+}
+
+.post-image-link img {
+  width: 100%;
+}
+
+.post-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: #000;
+}
+
+.latest-posts-sidebar {
+  position: sticky;
+  top: 96px;
+  padding: 22px;
+  border: 1px solid rgba(19, 138, 61, .12);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 36px rgba(15, 61, 46, .08);
+}
+
+.latest-posts-sidebar h2 {
+  margin-bottom: 16px;
+  color: var(--pgri-navy);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.latest-post-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(19, 138, 61, .12);
+  color: var(--text);
+}
+
+.latest-post-item:hover strong {
+  color: var(--pgri-red);
+}
+
+.latest-post-item img,
+.latest-post-thumb {
+  width: 72px;
+  height: 58px;
+  border-radius: 6px;
+}
+
+.latest-post-item img {
+  object-fit: cover;
+}
+
+.latest-post-thumb {
+  display: grid;
+  place-items: center;
+  background: var(--soft-bg);
+  color: var(--pgri-blue);
+}
+
+.latest-post-item strong,
+.latest-post-item small {
+  display: block;
+}
+
+.latest-post-item strong {
+  line-height: 1.25;
+}
+
+.latest-post-item small {
+  margin-top: 6px;
+  color: #6c7a89;
+}
+
+.btn-pgri {
+  background: var(--pgri-red);
+  color: #fff;
+  border: 0;
+}
+
+.btn-pgri:hover {
+  background: var(--pgri-red-dark);
+  color: #fff;
+}
+
+.stat-tile {
+  border-left: 5px solid var(--pgri-red);
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(15, 61, 46, .08);
+}
+
+.member-steps {
+  display: grid;
+  gap: 16px;
+}
+
+.member-steps div {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 4px 14px;
+  padding: 18px;
+  border: 1px solid rgba(19, 138, 61, .12);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 61, 46, .06);
+}
+
+.member-steps span {
+  grid-row: span 2;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--pgri-red);
+  color: #fff;
+  font-weight: 800;
+}
+
+.member-steps strong {
+  color: var(--pgri-navy);
+}
+
+.member-steps p {
+  margin: 0;
+  color: #64756d;
+}
+
+.registration-status-form {
+  min-width: 220px;
+}
+
+.school-delete-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.member-registration-modal {
+  background: rgba(255, 255, 255, .92);
+  border: 1px solid rgba(255, 255, 255, .7);
+  backdrop-filter: blur(8px);
+}
+
+.member-registration-modal .modal-body {
+  max-height: min(68vh, 640px);
+  overflow-y: auto;
+}
+
+.member-directory-table strong {
+  color: var(--pgri-navy);
+}
+
+.member-directory-table small {
+  color: #66766f;
+}
+
+.member-directory-table td,
+.member-directory-table th {
+  vertical-align: middle;
+}
+
+.member-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.member-avatar {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 61, 46, .12);
+  background: #f4f7f5;
+}
+
+.member-avatar-placeholder {
+  display: grid;
+  place-items: center;
+  color: #7a8b84;
+}
+
+.whatsapp-card {
+  border-color: rgba(37, 211, 102, .25);
+}
+
+.whatsapp-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #25d366;
+  color: #fff;
+  font-size: 1.6rem;
+}
+
+.page-header {
+  padding: 96px 0 56px;
+  color: #fff;
+  background: linear-gradient(120deg, var(--pgri-navy), var(--pgri-red));
+  background-image: var(--page-header-image);
+  background-position: center;
+  background-size: cover;
+}
+
+.table thead th {
+  background: var(--pgri-navy);
+  color: #fff;
+}
+
+.gallery-item {
+  cursor: zoom-in;
+  height: 100%;
+}
+
+.gallery-item img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.footer {
+  background: #0b2b20;
+  color: #d4e6dc;
+}
+
+.admin-shell {
+  min-height: 100vh;
+  background: #eef6f0;
+}
+
+.admin-sidebar {
+  width: 270px;
+  min-height: 100vh;
+  background: #0d3326;
+  color: #e7f4ec;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1030;
+}
+
+.admin-sidebar a {
+  color: #d5eadf;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 6px;
+}
+
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+
+.admin-main {
+  margin-left: 270px;
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--pgri-navy), var(--pgri-red));
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(255,255,255,.72);
+  z-index: 2000;
+}
+
+.loading-overlay.show {
+  display: grid;
+}
+
+@media (max-width: 991px) {
+  .hero {
+    min-height: auto;
+    padding: 44px 0 30px;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .latest-posts-sidebar {
+    position: static;
+  }
+  .admin-sidebar {
+    position: static;
+    width: 100%;
+    min-height: auto;
+  }
+  .admin-main { margin-left: 0; }
+}
