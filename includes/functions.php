@@ -414,6 +414,30 @@ function read_school_import_file(array $file): array
     throw new RuntimeException('Format file harus CSV atau XLSX.');
 }
 
+function detect_upload_mime(string $filePath): string
+{
+    if (function_exists('mime_content_type')) {
+        $mime = mime_content_type($filePath);
+        if (is_string($mime) && $mime !== '') {
+            return $mime;
+        }
+    }
+
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mime = finfo_file($finfo, $filePath);
+            finfo_close($finfo);
+            if (is_string($mime) && $mime !== '') {
+                return $mime;
+            }
+        }
+    }
+
+    $imageInfo = @getimagesize($filePath);
+    return is_array($imageInfo) ? (string)($imageInfo['mime'] ?? '') : '';
+}
+
 function upload_image(array $file, string $folder, int $maxBytes = 2097152): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -426,14 +450,14 @@ function upload_image(array $file, string $folder, int $maxBytes = 2097152): ?st
     }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime = mime_content_type($file['tmp_name']);
+    $mime = detect_upload_mime($file['tmp_name']);
     if (!isset($allowed[$mime])) {
         throw new RuntimeException('Format gambar harus JPG, PNG, atau WEBP.');
     }
 
     $dir = __DIR__ . '/../uploads/' . $folder;
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+    if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        throw new RuntimeException('Folder upload belum bisa dibuat. Periksa izin folder uploads.');
     }
 
     $name = uniqid($folder . '-', true) . '.' . $allowed[$mime];
