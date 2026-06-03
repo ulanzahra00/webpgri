@@ -3,7 +3,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const overlay = document.querySelector(".loading-overlay");
 
   document.querySelectorAll("form").forEach((form) => {
-    form.addEventListener("submit", () => overlay?.classList.add("show"));
+    form.addEventListener("submit", (event) => {
+      const oversizedFile = Array.from(form.querySelectorAll("input[type='file'][data-max-size]")).find((input) => {
+        const file = input.files?.[0];
+        return file && file.size > Number(input.dataset.maxSize || 0);
+      });
+
+      if (oversizedFile) {
+        event.preventDefault();
+        const maxMegabytes = Math.ceil(Number(oversizedFile.dataset.maxSize || 0) / 1024 / 1024);
+        alert(`Ukuran file terlalu besar. Maksimal ${maxMegabytes}MB.`);
+        oversizedFile.focus();
+        return;
+      }
+
+      overlay?.classList.add("show");
+    });
   });
 
   document.querySelectorAll("[data-confirm]").forEach((button) => {

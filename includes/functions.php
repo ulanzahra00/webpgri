@@ -444,9 +444,18 @@ function upload_image(array $file, string $folder, int $maxBytes = 2097152): ?st
         return null;
     }
 
-    if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > $maxBytes) {
-        $maxMegabytes = (int)ceil($maxBytes / 1024 / 1024);
-        throw new RuntimeException('Upload gagal atau ukuran file melebihi ' . $maxMegabytes . 'MB.');
+    $maxMegabytes = (int)ceil($maxBytes / 1024 / 1024);
+    $error = (int)($file['error'] ?? UPLOAD_ERR_OK);
+    if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
+        throw new RuntimeException('Ukuran file melebihi batas server. Maksimal ' . $maxMegabytes . 'MB.');
+    }
+
+    if ($error !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('Upload gagal. Silakan pilih ulang file gambar.');
+    }
+
+    if (($file['size'] ?? 0) > $maxBytes) {
+        throw new RuntimeException('Ukuran file melebihi ' . $maxMegabytes . 'MB.');
     }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
