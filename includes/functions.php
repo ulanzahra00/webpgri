@@ -438,24 +438,90 @@ function detect_upload_mime(string $filePath): string
     return is_array($imageInfo) ? (string)($imageInfo['mime'] ?? '') : '';
 }
 
-function upload_image(array $file, string $folder, int $maxBytes = 2097152): ?string
+function create_image_resource(string $filePath, string $mime)
+{
+    if ($mime === 'image/jpeg' && function_exists('imagecreatefromjpeg')) {
+        return imagecreatefromjpeg($filePath);
+    }
+
+    if ($mime === 'image/png' && function_exists('imagecreatefrompng')) {
+        return imagecreatefrompng($filePath);
+    }
+
+    if ($mime === 'image/webp' && function_exists('imagecreatefromwebp')) {
+        return imagecreatefromwebp($filePath);
+    }
+
+    return false;
+}
+
+function save_compressed_jpeg(string $sourcePath, string $targetPath, string $mime, int $maxBytes): bool
+{
+    if (!function_exists('imagejpeg') || !function_exists('imagecreatetruecolor') || !function_exists('imagecopyresampled')) {
+        throw new RuntimeException('Server belum mendukung kompresi gambar otomatis.');
+    }
+
+    $source = create_image_resource($sourcePath, $mime);
+    if (!$source) {
+        throw new RuntimeException('Gambar tidak dapat diproses untuk kompresi.');
+    }
+
+    $width = imagesx($source);
+    $height = imagesy($source);
+    if ($width < 1 || $height < 1) {
+        imagedestroy($source);
+        throw new RuntimeException('Ukuran gambar tidak valid.');
+    }
+
+    $maxDimension = 1800;
+    $quality = 85;
+
+    while ($maxDimension >= 640) {
+        $scale = min(1, $maxDimension / max($width, $height));
+        $newWidth = max(1, (int)round($width * $scale));
+        $newHeight = max(1, (int)round($height * $scale));
+        $canvas = imagecreatetruecolor($newWidth, $newHeight);
+        imagefill($canvas, 0, 0, imagecolorallocate($canvas, 255, 255, 255));
+        imagecopyresampled($canvas, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        for ($currentQuality = $quality; $currentQuality >= 45; $currentQuality -= 10) {
+            imagejpeg($canvas, $targetPath, $currentQuality);
+            if (is_file($targetPath) && filesize($targetPath) <= $maxBytes) {
+                imagedestroy($canvas);
+                imagedestroy($source);
+                return true;
+            }
+        }
+
+        imagedestroy($canvas);
+        $maxDimension = (int)floor($maxDimension * 0.75);
+        $quality = 80;
+    }
+
+    imagedestroy($source);
+    return false;
+}
+
+function upload_image(array $file, string $folder, int $maxBytes = 2097152, ?int $sourceMaxBytes = null): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
         return null;
     }
 
     $maxMegabytes = (int)ceil($maxBytes / 1024 / 1024);
+    $sourceLimit = $sourceMaxBytes ?? $maxBytes;
+    $sourceMaxMegabytes = (int)ceil($sourceLimit / 1024 / 1024);
     $error = (int)($file['error'] ?? UPLOAD_ERR_OK);
     if ($error === UPLOAD_ERR_INI_SIZE || $error === UPLOAD_ERR_FORM_SIZE) {
-        throw new RuntimeException('Ukuran file melebihi batas server. Maksimal ' . $maxMegabytes . 'MB.');
+        throw new RuntimeException('Ukuran file melebihi batas server. Maksimal file awal ' . $sourceMaxMegabytes . 'MB.');
     }
 
     if ($error !== UPLOAD_ERR_OK) {
         throw new RuntimeException('Upload gagal. Silakan pilih ulang file gambar.');
     }
 
-    if (($file['size'] ?? 0) > $maxBytes) {
-        throw new RuntimeException('Ukuran file melebihi ' . $maxMegabytes . 'MB.');
+    if (($file['size'] ?? 0) > $sourceLimit) {
+        throw new RuntimeException('Ukuran file awal melebihi ' . $sourceMaxMegabytes . 'MB.');
     }
 
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
@@ -469,8 +535,20 @@ function upload_image(array $file, string $folder, int $maxBytes = 2097152): ?st
         throw new RuntimeException('Folder upload belum bisa dibuat. Periksa izin folder uploads.');
     }
 
-    $name = uniqid($folder . '-', true) . '.' . $allowed[$mime];
+    $mustCompress = ($file['size'] ?? 0) > $maxBytes;
+    $extension = $mustCompress ? 'jpg' : $allowed[$mime];
+    $name = uniqid($folder . '-', true) . '.' . $extension;
     $target = $dir . '/' . $name;
+
+    if ($mustCompress) {
+        if (!save_compressed_jpeg($file['tmp_name'], $target, $mime, $maxBytes)) {
+            @unlink($target);
+            throw new RuntimeException('Foto belum bisa dikompres sampai maksimal ' . $maxMegabytes . 'MB. Coba pilih foto yang lebih kecil.');
+        }
+
+        return '/uploads/' . $folder . '/' . $name;
+    }
+
     if (!move_uploaded_file($file['tmp_name'], $target)) {
         throw new RuntimeException('Tidak dapat menyimpan file upload.');
     }

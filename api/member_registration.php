@@ -22,7 +22,7 @@ try {
     }
 
     $photo = null;
-    $photo = upload_image($_FILES['photo'] ?? [], 'anggota', 5 * 1024 * 1024);
+    $photo = upload_image($_FILES['photo'] ?? [], 'anggota', 5 * 1024 * 1024, 20 * 1024 * 1024);
 
     $stmt = db()->prepare('INSERT INTO member_registrations (full_name, identity_number, photo, email, phone, school_name, job_title, district, address, reason) VALUES (?,?,?,?,?,?,?,?,?,?)');
     $stmt->execute([
