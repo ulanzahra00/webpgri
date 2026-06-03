@@ -301,7 +301,7 @@ if ($page === 'profil') {
                             <div class="col-md-6"><label class="form-label">No. HP/WhatsApp</label><input class="form-control" name="phone" required></div>
                             <div class="col-md-7"><label class="form-label">Tempat Tugas/Sekolah</label><input class="form-control" name="school_name" required></div>
                             <div class="col-md-5"><label class="form-label">Jabatan/Profesi</label><input class="form-control" name="job_title" placeholder="Guru, Kepala Sekolah, dll."></div>
-                            <div class="col-md-5"><label class="form-label">Foto Anggota</label><input class="form-control" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/*"><small class="text-muted">Opsional. Format JPG, PNG, atau WEBP maksimal 2MB.</small></div>
+                            <div class="col-md-5"><label class="form-label">Foto Anggota</label><input class="form-control" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/*"><small class="text-muted">Opsional. Format JPG, PNG, atau WEBP maksimal 5MB.</small></div>
                             <div class="col-md-7"><label class="form-label">Kecamatan</label><input class="form-control" name="district"></div>
                             <div class="col-12"><label class="form-label">Alamat</label><input class="form-control" name="address"></div>
                             <div class="col-12"><label class="form-label">Catatan/Keterangan</label><textarea class="form-control" name="reason" rows="4" placeholder="Tuliskan informasi tambahan jika diperlukan."></textarea></div>

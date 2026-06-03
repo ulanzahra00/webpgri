@@ -22,7 +22,7 @@ if ($fullName === '' || !$email || $phone === '' || $schoolName === '') {
 
 $photo = null;
 try {
-    $photo = upload_image($_FILES['photo'] ?? [], 'anggota');
+    $photo = upload_image($_FILES['photo'] ?? [], 'anggota', 5 * 1024 * 1024);
 } catch (RuntimeException $error) {
     flash('danger', $error->getMessage());
     redirect('?page=anggota');
