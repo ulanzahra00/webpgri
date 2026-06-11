@@ -126,6 +126,16 @@ a { text-decoration: none; }
   background: var(--pgri-red);
 }
 
+.row > [class*="col-"] p,
+.row > [class*="col-"] li,
+.card-official .card-body p,
+.gallery-item p,
+.latest-posts-sidebar p,
+.section-band article p,
+.section-band .fs-5 {
+  text-align: justify;
+}
+
 .card-official {
   border: 1px solid rgba(19, 138, 61, .12);
   border-radius: 8px;
