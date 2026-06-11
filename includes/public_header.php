@@ -4,6 +4,19 @@ $pageTitle = $pageTitle ?? setting('site_name', 'PGRI Kotamobagu');
 $siteName = setting('site_name', 'PGRI Kotamobagu');
 $siteLogo = setting('site_logo');
 $heroBanner = setting('hero_banner', 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');
+$activePage = $page ?? 'home';
+$navItems = [
+    'home' => ['label' => 'Home', 'href' => url(''), 'icon' => 'fa-house'],
+    'profil' => ['label' => 'Profil', 'href' => url('?page=profil'), 'icon' => 'fa-id-card'],
+    'berita' => ['label' => 'Berita', 'href' => url('?page=berita'), 'icon' => 'fa-newspaper'],
+    'sekolah' => ['label' => 'Data Sekolah', 'href' => url('?page=sekolah'), 'icon' => 'fa-school'],
+    'anggota' => ['label' => 'Anggota', 'href' => url('?page=anggota'), 'icon' => 'fa-users'],
+    'keuangan' => ['label' => 'Keuangan', 'href' => url('?page=keuangan'), 'icon' => 'fa-wallet'],
+    'galeri' => ['label' => 'Galeri', 'href' => url('?page=galeri'), 'icon' => 'fa-images'],
+    'kontak' => ['label' => 'Keluhan', 'href' => url('?page=kontak'), 'icon' => 'fa-comment-dots'],
+];
+$activeNavKey = $activePage === 'detail' ? 'berita' : $activePage;
+$activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
 ?>
 <!doctype html>
 <html lang="id">
@@ -33,19 +46,23 @@ $heroBanner = setting('hero_banner', 'https://images.unsplash.com/photo-15090625
             <span class="logo-mark"><?php if ($siteLogo): ?><img src="<?= e(media_url($siteLogo)) ?>" alt="<?= e($siteName) ?>"><?php else: ?><i class="fa-solid fa-chalkboard-user"></i><?php endif; ?></span>
             <span><strong><?= e($siteName) ?></strong><small class="d-block text-muted">Organisasi Profesi Guru</small></span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"><span class="navbar-toggler-icon"></span></button>
-        <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav ms-auto gap-lg-2">
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('')) ?>">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=profil')) ?>">Profil</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=berita')) ?>">Berita</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=sekolah')) ?>">Data Sekolah</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=anggota')) ?>">Anggota</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=keuangan')) ?>">Keuangan</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=galeri')) ?>">Galeri</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= e(url('?page=kontak')) ?>">Keluhan</a></li>
-                <li class="nav-item"><a class="btn btn-sm btn-pgri ms-lg-2" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-1"></i>Login Admin</a></li>
+        <div class="dropdown mobile-nav-menu d-lg-none">
+            <button class="btn btn-pgri dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-bars me-2"></i><?= e($activeNavLabel) ?>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <?php foreach ($navItems as $key => $item): ?>
+                    <li><a class="dropdown-item <?= $activeNavKey === $key ? 'active' : '' ?>" href="<?= e($item['href']) ?>"><i class="fa-solid <?= e($item['icon']) ?> me-2"></i><?= e($item['label']) ?></a></li>
+                <?php endforeach; ?>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-2"></i>Login Admin</a></li>
             </ul>
         </div>
+        <ul class="navbar-nav ms-auto gap-lg-2 d-none d-lg-flex">
+            <?php foreach ($navItems as $key => $item): ?>
+                <li class="nav-item"><a class="nav-link <?= $activeNavKey === $key ? 'active' : '' ?>" href="<?= e($item['href']) ?>"><?= e($item['label']) ?></a></li>
+            <?php endforeach; ?>
+            <li class="nav-item"><a class="btn btn-sm btn-pgri ms-lg-2" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-1"></i>Login Admin</a></li>
+        </ul>
     </div>
 </nav>
