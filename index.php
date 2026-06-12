@@ -11,6 +11,9 @@ $pageTitle = ucfirst($page);
 $detailPost = null;
 $metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
 $metaImage = absolute_url(default_post_image_url());
+$metaImageWidth = 1200;
+$metaImageHeight = 630;
+$metaImageType = 'image/jpeg';
 $metaUrl = absolute_url(url('?' . http_build_query(['page' => $page] + array_intersect_key($_GET, array_flip(['slug', 'kategori', 'p'])))));
 $metaType = 'website';
 $metaPublishedAt = null;
@@ -24,6 +27,15 @@ if ($page === 'detail') {
         $pageTitle = $detailPost['title'];
         $metaDescription = meta_summary($detailPost['excerpt'] ?: $detailPost['content']);
         $metaImage = has_custom_post_image($detailPost['image']) ? absolute_url(media_url($detailPost['image'])) : absolute_url(default_post_image_url());
+        if (has_custom_post_image($detailPost['image'])) {
+            $imageFile = __DIR__ . '/' . ltrim((string)$detailPost['image'], '/');
+            $imageInfo = is_file($imageFile) ? getimagesize($imageFile) : false;
+            if ($imageInfo) {
+                $metaImageWidth = (int)$imageInfo[0];
+                $metaImageHeight = (int)$imageInfo[1];
+                $metaImageType = $imageInfo['mime'] ?? $metaImageType;
+            }
+        }
         $metaUrl = absolute_url(url('?page=detail&slug=' . $detailPost['slug']));
         $metaType = 'article';
         $metaPublishedAt = !empty($detailPost['published_at']) ? date(DATE_ATOM, strtotime($detailPost['published_at'])) : null;

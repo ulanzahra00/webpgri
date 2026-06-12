@@ -6,6 +6,9 @@ $siteLogo = setting('site_logo');
 $heroBanner = setting('hero_banner', 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');
 $metaDescription = $metaDescription ?? 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
 $metaImage = $metaImage ?? absolute_url($siteLogo ?: $heroBanner ?: default_post_image_url());
+$metaImageWidth = $metaImageWidth ?? 1200;
+$metaImageHeight = $metaImageHeight ?? 630;
+$metaImageType = $metaImageType ?? 'image/jpeg';
 $metaUrl = $metaUrl ?? absolute_url(url(''));
 $metaType = $metaType ?? 'website';
 $metaTitle = $pageTitle . ' - ' . $siteName;
@@ -37,7 +40,11 @@ $activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
     <meta property="og:description" content="<?= e($metaDescription) ?>">
     <meta property="og:url" content="<?= e($metaUrl) ?>">
     <meta property="og:image" content="<?= e($metaImage) ?>">
+    <meta property="og:image:url" content="<?= e($metaImage) ?>">
     <meta property="og:image:secure_url" content="<?= e($metaImage) ?>">
+    <meta property="og:image:type" content="<?= e($metaImageType) ?>">
+    <meta property="og:image:width" content="<?= e((string)$metaImageWidth) ?>">
+    <meta property="og:image:height" content="<?= e((string)$metaImageHeight) ?>">
     <meta property="og:image:alt" content="<?= e($pageTitle) ?>">
     <?php if (!empty($metaPublishedAt)): ?>
     <meta property="article:published_time" content="<?= e($metaPublishedAt) ?>">
@@ -46,6 +53,7 @@ $activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
     <meta name="twitter:title" content="<?= e($metaTitle) ?>">
     <meta name="twitter:description" content="<?= e($metaDescription) ?>">
     <meta name="twitter:image" content="<?= e($metaImage) ?>">
+    <meta name="thumbnail" content="<?= e($metaImage) ?>">
     <title><?= e($metaTitle) ?></title>
     <link rel="canonical" href="<?= e($metaUrl) ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
