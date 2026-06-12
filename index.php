@@ -8,6 +8,34 @@ redirect_legacy_public_url();
 
 $page = $_GET['page'] ?? 'home';
 $pageTitle = ucfirst($page);
+$detailPost = null;
+$metaDescription = 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
+$metaImage = absolute_url(default_post_image_url());
+$metaUrl = absolute_url(url('?' . http_build_query(['page' => $page] + array_intersect_key($_GET, array_flip(['slug', 'kategori', 'p'])))));
+$metaType = 'website';
+$metaPublishedAt = null;
+
+if ($page === 'detail') {
+    $stmt = db()->prepare('SELECT posts.*, categories.name AS category_name FROM posts LEFT JOIN categories ON categories.id = posts.category_id WHERE posts.slug = ? AND status = "published" LIMIT 1');
+    $stmt->execute([$_GET['slug'] ?? '']);
+    $detailPost = $stmt->fetch();
+
+    if ($detailPost) {
+        $pageTitle = $detailPost['title'];
+        $metaDescription = meta_summary($detailPost['excerpt'] ?: $detailPost['content']);
+        $metaImage = has_custom_post_image($detailPost['image']) ? absolute_url(media_url($detailPost['image'])) : absolute_url(default_post_image_url());
+        $metaUrl = absolute_url(url('?page=detail&slug=' . $detailPost['slug']));
+        $metaType = 'article';
+        $metaPublishedAt = !empty($detailPost['published_at']) ? date(DATE_ATOM, strtotime($detailPost['published_at'])) : null;
+    } else {
+        $pageTitle = 'Berita tidak ditemukan';
+        $metaUrl = absolute_url(url('?page=berita'));
+    }
+} elseif ($page === 'berita') {
+    $pageTitle = 'Berita & Artikel';
+    $metaDescription = 'Informasi resmi kegiatan PGRI Kotamobagu, berita pendidikan, dan artikel organisasi profesi guru.';
+    $metaUrl = absolute_url(url('?page=berita'));
+}
 require_once __DIR__ . '/includes/public_header.php';
 
 function render_latest_posts_sidebar(?string $currentSlug = null): void
@@ -126,9 +154,7 @@ if ($page === 'profil') {
     </section>
     <?php
 } elseif ($page === 'detail') {
-    $stmt = db()->prepare('SELECT posts.*, categories.name AS category_name FROM posts LEFT JOIN categories ON categories.id = posts.category_id WHERE posts.slug = ? AND status = "published" LIMIT 1');
-    $stmt->execute([$_GET['slug'] ?? '']);
-    $post = $stmt->fetch();
+    $post = $detailPost;
     if (!$post) { echo '<main class="section-band"><div class="container"><h1>Berita tidak ditemukan</h1></div></main>'; }
     else { ?>
         <header class="page-header page-header-news"><div class="container"><span class="badge text-bg-light mb-3"><?= e($post['category_name']) ?></span><h1><?= e($post['title']) ?></h1></div></header>

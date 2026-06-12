@@ -72,6 +72,33 @@ function url(string $path = ''): string
     return (base_path() === '' ? '' : base_path()) . '/' . ltrim($path, '/');
 }
 
+function absolute_url(string $path = ''): string
+{
+    if (preg_match('#^https?://#', $path)) {
+        return $path;
+    }
+
+    $scheme = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'pgrikotamobagu.my.id';
+
+    return $scheme . '://' . $host . url($path);
+}
+
+function meta_summary(?string $value, int $limit = 160): string
+{
+    $text = trim(preg_replace('/\s+/', ' ', strip_tags($value ?? '')));
+    if ($text === '') {
+        return 'Website resmi PGRI Kotamobagu, pusat informasi organisasi guru, berita pendidikan, data sekolah, galeri, dan layanan publik.';
+    }
+
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($text, 'UTF-8') > $limit ? rtrim(mb_substr($text, 0, $limit - 3, 'UTF-8')) . '...' : $text;
+    }
+
+    return strlen($text) > $limit ? rtrim(substr($text, 0, $limit - 3)) . '...' : $text;
+}
+
 function pretty_public_path(string $page, array $query = []): string
 {
     unset($query['page']);
