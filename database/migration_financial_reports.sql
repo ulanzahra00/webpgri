@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS financial_reports (
 );
 
 ALTER TABLE financial_reports ADD COLUMN IF NOT EXISTS deposit_date DATE NULL AFTER period_year;
+ALTER TABLE financial_reports ADD COLUMN IF NOT EXISTS report_date DATE NULL AFTER deposit_date;
 
 INSERT INTO financial_reports (title, period_month, period_year, deposit_date, category, income, expense, description, status)
 SELECT 'Iuran Anggota Bulan Januari', 1, 2026, '2026-01-10', 'Iuran Anggota', 12500000, 0, 'Penerimaan iuran anggota PGRI Kotamobagu bulan Januari.', 'published'

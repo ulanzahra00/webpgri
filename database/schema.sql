@@ -95,6 +95,7 @@ CREATE TABLE financial_reports (
     period_month TINYINT NOT NULL,
     period_year YEAR NOT NULL,
     deposit_date DATE NULL,
+    report_date DATE NULL,
     category VARCHAR(120) NOT NULL,
     income DECIMAL(15,2) DEFAULT 0,
     expense DECIMAL(15,2) DEFAULT 0,

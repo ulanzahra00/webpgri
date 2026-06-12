@@ -65,7 +65,111 @@ function url(string $path = ''): string
         return $path;
     }
 
+    if (starts_with($path, '?')) {
+        return public_query_url($path);
+    }
+
     return (base_path() === '' ? '' : base_path()) . '/' . ltrim($path, '/');
+}
+
+function pretty_public_path(string $page, array $query = []): string
+{
+    unset($query['page']);
+    $page = trim($page);
+
+    if ($page === '' || $page === 'home') {
+        $path = '';
+    } elseif ($page === 'detail') {
+        $slug = trim((string)($query['slug'] ?? ''));
+        unset($query['slug']);
+        $path = $slug !== '' ? 'berita/' . rawurlencode($slug) : 'berita';
+    } else {
+        $path = rawurlencode($page);
+    }
+
+    $url = (base_path() === '' ? '/' : base_path() . '/') . $path;
+    $queryString = http_build_query($query);
+    return $queryString !== '' ? rtrim($url, '/') . '?' . $queryString : $url;
+}
+
+function public_query_url(string $path): string
+{
+    $queryString = ltrim($path, '?');
+    parse_str($queryString, $query);
+
+    if (!isset($query['page'])) {
+        return (base_path() === '' ? '' : base_path()) . '/?' . $queryString;
+    }
+
+    return pretty_public_path((string)$query['page'], $query);
+}
+
+function public_route_from_request(): array
+{
+    $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $basePath = base_path();
+    if ($basePath !== '' && starts_with($requestPath, $basePath)) {
+        $requestPath = substr($requestPath, strlen($basePath));
+    }
+
+    $requestPath = trim($requestPath, '/');
+    if ($requestPath === '' || $requestPath === 'index.php') {
+        return [];
+    }
+
+    $segments = array_values(array_filter(explode('/', $requestPath), 'strlen'));
+    if (($segments[0] ?? '') === 'berita' && isset($segments[1])) {
+        return ['page' => 'detail', 'slug' => rawurldecode($segments[1])];
+    }
+
+    $allowedPages = ['profil', 'berita', 'sekolah', 'anggota', 'keuangan', 'galeri', 'kontak'];
+    if (in_array($segments[0] ?? '', $allowedPages, true)) {
+        return ['page' => $segments[0]];
+    }
+
+    return [];
+}
+
+function redirect_legacy_public_url(): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || !isset($_GET['page'])) {
+        return;
+    }
+
+    $target = pretty_public_path((string)$_GET['page'], $_GET);
+    $current = $_SERVER['REQUEST_URI'] ?? '';
+    if ($current !== '' && $target === $current) {
+        return;
+    }
+
+    header('Location: ' . $target, true, 301);
+    exit;
+}
+
+function render_linked_text(?string $value): string
+{
+    $escaped = e($value);
+    $linked = preg_replace_callback('~\b((?:https?://|www\.)[^\s<]+)~i', function (array $matches): string {
+        $urlText = $matches[1];
+        $trailing = '';
+        while ($urlText !== '' && preg_match('/[.,;:!?)]$/', $urlText)) {
+            $trailing = substr($urlText, -1) . $trailing;
+            $urlText = substr($urlText, 0, -1);
+        }
+
+        $href = html_entity_decode($urlText, ENT_QUOTES, 'UTF-8');
+        if (preg_match('~^www\.~i', $href)) {
+            $href = 'https://' . $href;
+        }
+
+        if (!filter_var($href, FILTER_VALIDATE_URL)) {
+            return $matches[1];
+        }
+
+        return '<a class="content-link" href="' . e($href) . '" target="_blank" rel="noopener noreferrer">' . $urlText . '</a>' . $trailing;
+    }, $escaped);
+
+    return nl2br($linked ?? $escaped);
 }
 
 function media_url(?string $path): string
@@ -261,6 +365,11 @@ function ensure_financial_reports_deposit_date_column(): void
     $column = db()->query("SHOW COLUMNS FROM financial_reports LIKE 'deposit_date'")->fetch();
     if (!$column) {
         db()->exec('ALTER TABLE financial_reports ADD deposit_date DATE NULL AFTER period_year');
+    }
+
+    $column_report = db()->query("SHOW COLUMNS FROM financial_reports LIKE 'report_date'")->fetch();
+    if (!$column_report) {
+        db()->exec('ALTER TABLE financial_reports ADD report_date DATE NULL AFTER deposit_date');
     }
 
     $checked = true;

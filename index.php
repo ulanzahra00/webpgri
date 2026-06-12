@@ -2,6 +2,10 @@
 // Router public sederhana berbasis query string agar cocok untuk shared hosting.
 require_once __DIR__ . '/includes/functions.php';
 
+$prettyRoute = public_route_from_request();
+$_GET = array_merge($_GET, $prettyRoute);
+redirect_legacy_public_url();
+
 $page = $_GET['page'] ?? 'home';
 $pageTitle = ucfirst($page);
 require_once __DIR__ . '/includes/public_header.php';
@@ -128,7 +132,7 @@ if ($page === 'profil') {
     if (!$post) { echo '<main class="section-band"><div class="container"><h1>Berita tidak ditemukan</h1></div></main>'; }
     else { ?>
         <header class="page-header page-header-news"><div class="container"><span class="badge text-bg-light mb-3"><?= e($post['category_name']) ?></span><h1><?= e($post['title']) ?></h1></div></header>
-        <article class="section-band"><div class="container"><div class="row g-5 align-items-start"><div class="col-lg-8"><?php if (!empty($post['video'])): ?><video class="post-video mb-4" controls preload="metadata" <?= has_custom_post_image($post['image']) ? 'poster="' . e(media_url($post['image'])) . '"' : '' ?>><source src="<?= e(media_url($post['video'])) ?>" type="video/mp4">Browser Anda tidak mendukung pemutar video.</video><?php elseif (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(media_url($post['image'])) ?>" target="_blank" rel="noopener"><img loading="lazy" class="img-fluid rounded mb-4" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><p class="text-muted"><?= date('d M Y', strtotime($post['published_at'])) ?></p><div class="fs-5"><?= nl2br(e($post['content'])) ?></div></div><div class="col-lg-4"><?php render_latest_posts_sidebar($post['slug']); ?></div></div></div></article>
+        <article class="section-band"><div class="container"><div class="row g-5 align-items-start"><div class="col-lg-8"><?php if (!empty($post['video'])): ?><video class="post-video mb-4" controls preload="metadata" <?= has_custom_post_image($post['image']) ? 'poster="' . e(media_url($post['image'])) . '"' : '' ?>><source src="<?= e(media_url($post['video'])) ?>" type="video/mp4">Browser Anda tidak mendukung pemutar video.</video><?php elseif (has_custom_post_image($post['image'])): ?><a class="post-image-link" href="<?= e(media_url($post['image'])) ?>" target="_blank" rel="noopener"><img loading="lazy" class="img-fluid rounded mb-4" src="<?= e(media_url($post['image'])) ?>" alt="<?= e($post['title']) ?>"></a><?php endif; ?><p class="text-muted"><?= date('d M Y', strtotime($post['published_at'])) ?></p><div class="fs-5 post-content"><?= render_linked_text($post['content']) ?></div></div><div class="col-lg-4"><?php render_latest_posts_sidebar($post['slug']); ?></div></div></div></article>
     <?php }
 } elseif ($page === 'sekolah') {
     $district = $_GET['kecamatan'] ?? '';
