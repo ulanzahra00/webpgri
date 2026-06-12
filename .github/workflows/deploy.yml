@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Ambil kode terbaru dari GitHub
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Upload via FTP ke cPanel
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      uses: SamKirkland/FTP-Deploy-Action@v4.4.0
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
+        server: ftp.pgrikotamobagu.my.id
+        username: pgrikota
         password: ${{ secrets.FTP_PASSWORD }}
+        protocol: ftps
+        port: 21
         server-dir: ./
