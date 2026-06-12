@@ -250,13 +250,52 @@ if ($module === 'dashboard') {
         </form>
         <?php
     } else {
-        $rows = db()->query('SELECT * FROM financial_reports ORDER BY period_year DESC, period_month DESC, id DESC')->fetchAll();
-        $totals = db()->query('SELECT COALESCE(SUM(income),0) AS income_total, COALESCE(SUM(expense),0) AS expense_total, COALESCE(SUM(balance),0) AS balance_total FROM financial_reports')->fetch();
+        $filterMonth = (int)($_GET['bulan'] ?? 0);
+        if ($filterMonth < 1 || $filterMonth > 12) {
+            $filterMonth = 0;
+        }
+
+        $where = '';
+        $params = [];
+        if ($filterMonth > 0) {
+            $where = 'WHERE period_month = ?';
+            $params[] = $filterMonth;
+        }
+
+        $stmt = db()->prepare("SELECT * FROM financial_reports $where ORDER BY period_year DESC, period_month DESC, id DESC");
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+
+        $summary = db()->prepare("SELECT COALESCE(SUM(income),0) AS income_total, COALESCE(SUM(expense),0) AS expense_total, COALESCE(SUM(balance),0) AS balance_total FROM financial_reports $where");
+        $summary->execute($params);
+        $totals = $summary->fetch();
         ?>
         <div class="d-flex flex-wrap gap-2 justify-content-between mb-3">
             <h4>Kelola Laporan Keuangan</h4>
             <div><a class="btn btn-outline-primary" href="<?= e(url('api/export_finance.php')) ?>"><i class="fa-solid fa-file-csv me-2"></i>Export CSV</a> <a class="btn btn-pgri" href="<?= e(url('admin/?module=finance&action=form')) ?>">Tambah Laporan</a></div>
         </div>
+        <form class="card card-official p-3 mb-3" method="get">
+            <input type="hidden" name="module" value="finance">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Pilih Bulan</label>
+                    <select class="form-select" name="bulan">
+                        <option value="0">Semua Bulan</option>
+                        <?php foreach ($months as $number => $name): ?>
+                            <option value="<?= $number ?>" <?= $filterMonth === $number ? 'selected' : '' ?>><?= e($name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button class="btn btn-pgri"><i class="fa-solid fa-filter me-2"></i>Filter</button>
+                </div>
+                <?php if ($filterMonth > 0): ?>
+                    <div class="col-md-auto">
+                        <a class="btn btn-outline-secondary" href="<?= e(url('admin/?module=finance')) ?>">Reset</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </form>
         <div class="row g-3 mb-3">
             <div class="col-md-4"><div class="stat-tile p-3"><small>Total Pemasukan</small><h5 class="text-success mb-0"><?= rupiah((float)$totals['income_total']) ?></h5></div></div>
             <div class="col-md-4"><div class="stat-tile p-3"><small>Total Pengeluaran</small><h5 class="text-danger mb-0"><?= rupiah((float)$totals['expense_total']) ?></h5></div></div>
