@@ -217,7 +217,7 @@ if ($page === 'profil') {
     $approvedDistrictCount = (int)db()->query('SELECT COUNT(DISTINCT district) FROM member_registrations WHERE status = "approved" AND district IS NOT NULL AND district != ""')->fetchColumn();
     $memberDistricts = db()->query('SELECT DISTINCT district FROM member_registrations WHERE status = "approved" AND district IS NOT NULL AND district != "" ORDER BY district')->fetchAll();
     ?>
-    <header class="page-header page-header-members"><div class="container"><h1>Registrasi Anggota</h1><p class="lead mb-0">Daftar sebagai anggota PGRI Kotamobagu untuk mendapatkan layanan dan informasi organisasi.</p></div></header>
+    <header class="page-header page-header-members"><div class="container"><h1>Registrasi Anggota</h1><p class="lead mb-0">Direktori anggota PGRI Kotamobagu yang telah diverifikasi oleh sekretariat.</p></div></header>
     <section class="section-band section-soft">
         <div class="container">
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-end mb-4">
@@ -225,7 +225,7 @@ if ($page === 'profil') {
                     <h2 class="section-title mb-0">Direktori Anggota</h2>
                     <p class="text-muted mb-0 mt-3">Daftar anggota yang sudah diverifikasi oleh sekretariat.</p>
                 </div>
-                <button class="btn btn-pgri" type="button" data-bs-toggle="modal" data-bs-target="#memberRegistrationModal"><i class="fa-solid fa-user-plus me-2"></i>Registrasi Baru</button>
+                <button class="btn btn-pgri" type="button" data-bs-toggle="modal" data-bs-target="#memberRegistrationModal"><i class="fa-solid fa-circle-info me-2"></i>Info Registrasi</button>
             </div>
             <?php if ($flash): ?><div class="alert alert-<?= e($flash['type']) ?>"><?= e($flash['message']) ?></div><?php endif; ?>
             <div class="row g-3 mb-4">
@@ -282,36 +282,25 @@ if ($page === 'profil') {
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title" id="memberRegistrationModalLabel">Registrasi Anggota Baru</h5>
-                        <small class="text-muted">Lengkapi data untuk diverifikasi sekretariat PGRI Kotamobagu.</small>
+                        <small class="text-muted">Informasi layanan registrasi anggota PGRI Kotamobagu.</small>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <form action="<?= e(url('api/member_registration.php')) ?>" method="post" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
-                        <div class="member-steps mb-4">
-                            <div><span>1</span><strong>Isi formulir</strong><p>Lengkapi data diri, kontak, dan tempat tugas dengan benar.</p></div>
-                            <div><span>2</span><strong>Verifikasi sekretariat</strong><p>Admin akan mengecek data pendaftaran yang masuk.</p></div>
-                            <div><span>3</span><strong>Konfirmasi anggota</strong><p>Hasil verifikasi akan disampaikan melalui kontak yang didaftarkan.</p></div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-8"><label class="form-label">Nama Lengkap</label><input class="form-control" name="full_name" required></div>
-                            <div class="col-md-4"><label class="form-label">NIP/NIK/NUPTK</label><input class="form-control" name="identity_number"></div>
-                            <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" type="email" name="email" required></div>
-                            <div class="col-md-6"><label class="form-label">No. HP/WhatsApp</label><input class="form-control" name="phone" required></div>
-                            <div class="col-md-7"><label class="form-label">Tempat Tugas/Sekolah</label><input class="form-control" name="school_name" required></div>
-                            <div class="col-md-5"><label class="form-label">Jabatan/Profesi</label><input class="form-control" name="job_title" placeholder="Guru, Kepala Sekolah, dll."></div>
-                            <div class="col-md-5"><label class="form-label">Foto Anggota</label><input class="form-control" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/*" data-max-size="20971520"><small class="text-muted">Opsional. Foto hingga 20MB akan dikompres otomatis menjadi maksimal 5MB.</small></div>
-                            <div class="col-md-7"><label class="form-label">Kecamatan</label><input class="form-control" name="district"></div>
-                            <div class="col-12"><label class="form-label">Alamat</label><input class="form-control" name="address"></div>
-                            <div class="col-12"><label class="form-label">Catatan/Keterangan</label><textarea class="form-control" name="reason" rows="4" placeholder="Tuliskan informasi tambahan jika diperlukan."></textarea></div>
-                        </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning mb-4">
+                        <h6 class="alert-heading mb-2"><i class="fa-solid fa-circle-info me-2"></i>Registrasi anggota sementara ditutup</h6>
+                        <p class="mb-0">Pendaftaran anggota baru melalui website sedang dinonaktifkan sementara. Silakan hubungi sekretariat PGRI Kotamobagu untuk informasi pendaftaran atau pembaruan data anggota.</p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button class="btn btn-pgri"><i class="fa-solid fa-user-plus me-2"></i>Kirim Registrasi</button>
+                    <div class="member-steps mb-0">
+                        <div><span>1</span><strong>Registrasi ditahan</strong><p>Formulir online belum menerima pendaftaran baru.</p></div>
+                        <div><span>2</span><strong>Hubungi sekretariat</strong><p>Pengurus akan memberi arahan pendaftaran yang berlaku saat ini.</p></div>
+                        <div><span>3</span><strong>Pembaruan berikutnya</strong><p>Informasi akan diperbarui saat registrasi online dibuka kembali.</p></div>
                     </div>
-                </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-pgri" href="<?= e(url('?page=kontak')) ?>"><i class="fa-solid fa-envelope me-2"></i>Hubungi Sekretariat</a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
