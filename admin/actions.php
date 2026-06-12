@@ -177,7 +177,6 @@ try {
             $periodMonth,
             (int)$_POST['period_year'],
             $_POST['deposit_date'] ?: null,
-            null,
             trim($_POST['category']),
             (float)($_POST['income'] ?? 0),
             (float)($_POST['expense'] ?? 0),
@@ -189,10 +188,10 @@ try {
             $old = db()->prepare('SELECT document FROM financial_reports WHERE id = ?');
             $old->execute([$id]);
             $document = $document ?: $old->fetchColumn();
-            $stmt = db()->prepare('UPDATE financial_reports SET title=?, period_month=?, period_year=?, deposit_date=?, report_date=?, category=?, income=?, expense=?, description=?, status=?, document=? WHERE id=?');
+            $stmt = db()->prepare('UPDATE financial_reports SET title=?, period_month=?, period_year=?, deposit_date=?, category=?, income=?, expense=?, description=?, status=?, document=? WHERE id=?');
             $stmt->execute(array_merge($data, [$document, $id]));
         } else {
-            $stmt = db()->prepare('INSERT INTO financial_reports (title,period_month,period_year,deposit_date,report_date,category,income,expense,description,status,document) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+            $stmt = db()->prepare('INSERT INTO financial_reports (title,period_month,period_year,deposit_date,category,income,expense,description,status,document) VALUES (?,?,?,?,?,?,?,?,?,?)');
             $stmt->execute(array_merge($data, [$document]));
         }
         flash('success', 'Laporan keuangan berhasil disimpan.');
