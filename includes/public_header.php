@@ -40,13 +40,13 @@ $activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
         <span><i class="fa-solid fa-envelope me-2"></i><?= e(setting('email')) ?> <span class="mx-2">|</span> <i class="fa-solid fa-phone me-2"></i><?= e(setting('phone')) ?></span>
     </div>
 </div>
-<nav class="navbar navbar-expand-lg bg-white sticky-top main-navbar">
+<nav class="navbar navbar-expand-xl bg-white sticky-top main-navbar">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-3" href="<?= e(url('')) ?>">
             <span class="logo-mark"><?php if ($siteLogo): ?><img src="<?= e(media_url($siteLogo)) ?>" alt="<?= e($siteName) ?>"><?php else: ?><i class="fa-solid fa-chalkboard-user"></i><?php endif; ?></span>
             <span><strong><?= e($siteName) ?></strong><small class="d-block text-muted">Organisasi Profesi Guru</small></span>
         </a>
-        <div class="dropdown mobile-nav-menu d-lg-none">
+        <div class="dropdown mobile-nav-menu d-xl-none">
             <button class="btn btn-pgri dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-bars me-2"></i><?= e($activeNavLabel) ?>
             </button>
@@ -58,11 +58,11 @@ $activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
                 <li><a class="dropdown-item" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-2"></i>Login Admin</a></li>
             </ul>
         </div>
-        <ul class="navbar-nav ms-auto gap-lg-2 d-none d-lg-flex">
+        <ul class="navbar-nav ms-auto gap-xl-2 d-none d-xl-flex">
             <?php foreach ($navItems as $key => $item): ?>
                 <li class="nav-item"><a class="nav-link <?= $activeNavKey === $key ? 'active' : '' ?>" href="<?= e($item['href']) ?>"><?= e($item['label']) ?></a></li>
             <?php endforeach; ?>
-            <li class="nav-item"><a class="btn btn-sm btn-pgri ms-lg-2" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-1"></i>Login Admin</a></li>
+            <li class="nav-item"><a class="btn btn-sm btn-pgri ms-xl-2" href="<?= e(url('admin/login.php')) ?>"><i class="fa-solid fa-right-to-bracket me-1"></i>Login Admin</a></li>
         </ul>
     </div>
 </nav>

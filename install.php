@@ -3,6 +3,25 @@
 // Jalankan sekali dari browser/CLI setelah database dibuat, lalu hapus file ini di hosting produksi.
 require_once __DIR__ . '/config/database.php';
 
+function require_install_access(): void
+{
+    if (PHP_SAPI === 'cli') {
+        return;
+    }
+
+    $remoteAddress = $_SERVER['REMOTE_ADDR'] ?? '';
+    $isLocalRequest = in_array($remoteAddress, ['127.0.0.1', '::1'], true);
+    $installToken = getenv('INSTALL_TOKEN') ?: '';
+    $requestToken = $_GET['token'] ?? '';
+
+    if ($isLocalRequest || ($installToken !== '' && hash_equals($installToken, $requestToken))) {
+        return;
+    }
+
+    http_response_code(403);
+    exit('Akses instalasi ditolak. Jalankan dari server lokal/CLI atau set INSTALL_TOKEN.');
+}
+
 function read_install_sql(string $file): string
 {
     $sql = file_get_contents($file);
@@ -18,6 +37,8 @@ function read_install_sql(string $file): string
 }
 
 try {
+    require_install_access();
+
     $pdo = new PDO(
         'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
         DB_USER,

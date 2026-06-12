@@ -16,7 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        session_regenerate_id(true);
         $_SESSION['admin'] = ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role']];
+        $_SESSION['admin_last_activity'] = time();
+        unset($_SESSION['csrf_token']);
         redirect('admin/');
     }
 
@@ -45,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" required autofocus></div>
         <div class="mb-4"><label class="form-label">Password</label><input class="form-control" type="password" name="password" required></div>
         <button class="btn btn-pgri w-100 py-2"><i class="fa-solid fa-right-to-bracket me-2"></i>Masuk</button>
-        <p class="small text-muted mt-3 mb-0">Dummy: admin@pgrikotamobagu.my.id / admin12345</p>
+        <a class="btn btn-outline-primary w-100 mt-3" href="<?= e(url('')) ?>"><i class="fa-solid fa-arrow-left me-2"></i>Kembali ke Home</a>
     </form>
 </main>
 </body>

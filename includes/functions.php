@@ -1,8 +1,22 @@
 <?php
 // Helper umum untuk sanitasi, auth, upload, flash message, dan query kecil.
 if (session_status() === PHP_SESSION_NONE) {
+    $isSecureRequest = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'secure' => $isSecureRequest,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
+
+const ADMIN_SESSION_TIMEOUT = 1800;
 
 require_once __DIR__ . '/../config/database.php';
 
@@ -146,7 +160,20 @@ function get_flash(): ?array
 
 function current_admin(): ?array
 {
-    return $_SESSION['admin'] ?? null;
+    $admin = $_SESSION['admin'] ?? null;
+    if (!$admin) {
+        return null;
+    }
+
+    $now = time();
+    $lastActivity = (int)($_SESSION['admin_last_activity'] ?? 0);
+    if ($lastActivity > 0 && ($now - $lastActivity) > ADMIN_SESSION_TIMEOUT) {
+        unset($_SESSION['admin'], $_SESSION['admin_last_activity'], $_SESSION['csrf_token']);
+        return null;
+    }
+
+    $_SESSION['admin_last_activity'] = $now;
+    return $admin;
 }
 
 function require_admin(): void
@@ -219,6 +246,21 @@ function ensure_member_registrations_table(): void
     $photoColumn = db()->query("SHOW COLUMNS FROM member_registrations LIKE 'photo'")->fetch();
     if (!$photoColumn) {
         db()->exec('ALTER TABLE member_registrations ADD photo VARCHAR(255) NULL AFTER identity_number');
+    }
+
+    $checked = true;
+}
+
+function ensure_financial_reports_deposit_date_column(): void
+{
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+
+    $column = db()->query("SHOW COLUMNS FROM financial_reports LIKE 'deposit_date'")->fetch();
+    if (!$column) {
+        db()->exec('ALTER TABLE financial_reports ADD deposit_date DATE NULL AFTER period_year');
     }
 
     $checked = true;

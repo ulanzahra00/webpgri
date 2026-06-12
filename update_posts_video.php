@@ -3,6 +3,10 @@
 // Jalankan sekali dari browser/CLI, lalu hapus file ini di hosting produksi.
 require_once __DIR__ . '/includes/functions.php';
 
+if (PHP_SAPI !== 'cli') {
+    require_admin();
+}
+
 try {
     $pdo = db();
     $column = $pdo->query("SHOW COLUMNS FROM posts LIKE 'video'")->fetch();

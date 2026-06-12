@@ -306,6 +306,7 @@ if ($page === 'profil') {
     </div>
     <?php
 } elseif ($page === 'keuangan') {
+    ensure_financial_reports_deposit_date_column();
     $year = (int)($_GET['tahun'] ?? date('Y'));
     $month = (int)($_GET['bulan'] ?? 0);
     $params = [$year];
@@ -339,10 +340,11 @@ if ($page === 'profil') {
                 <div class="col-md-2"><a class="btn btn-outline-primary w-100" href="<?= e(url('api/export_finance.php')) ?>"><i class="fa-solid fa-file-csv me-2"></i>CSV</a></div>
             </form>
             <input class="form-control mb-3" data-table-search="#financeTable" placeholder="Search realtime judul, kategori, keterangan...">
-            <div class="card card-official"><div class="table-responsive"><table class="table table-bordered align-middle mb-0" id="financeTable"><thead><tr><th>Periode</th><th>Uraian</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Dokumen</th></tr></thead><tbody>
+            <div class="card card-official"><div class="table-responsive"><table class="table table-bordered align-middle mb-0" id="financeTable"><thead><tr><th>Periode</th><th>Tanggal Setor</th><th>Uraian</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Dokumen</th></tr></thead><tbody>
                 <?php foreach ($reports as $report): ?>
                     <tr>
                         <td><?= e($months[(int)$report['period_month']] ?? '-') ?> <?= e($report['period_year']) ?></td>
+                        <td><?= !empty($report['deposit_date']) ? e(date('d M Y', strtotime($report['deposit_date']))) : '-' ?></td>
                         <td><strong><?= e($report['title']) ?></strong><br><small><?= e($report['description']) ?></small></td>
                         <td><?= e($report['category']) ?></td>
                         <td class="text-success fw-semibold"><?= rupiah((float)$report['income']) ?></td>

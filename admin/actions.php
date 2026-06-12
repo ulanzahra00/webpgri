@@ -10,6 +10,10 @@ if ($module === 'member_registrations') {
     ensure_member_registrations_table();
 }
 
+if ($module === 'finance') {
+    ensure_financial_reports_deposit_date_column();
+}
+
 if ($module === 'schools' && $action === 'template') {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename=template-data-sekolah.csv');
@@ -168,6 +172,7 @@ try {
             trim($_POST['title']),
             (int)$_POST['period_month'],
             (int)$_POST['period_year'],
+            $_POST['deposit_date'] ?: null,
             trim($_POST['category']),
             (float)($_POST['income'] ?? 0),
             (float)($_POST['expense'] ?? 0),
@@ -179,10 +184,10 @@ try {
             $old = db()->prepare('SELECT document FROM financial_reports WHERE id = ?');
             $old->execute([$id]);
             $document = $document ?: $old->fetchColumn();
-            $stmt = db()->prepare('UPDATE financial_reports SET title=?, period_month=?, period_year=?, category=?, income=?, expense=?, description=?, status=?, document=? WHERE id=?');
+            $stmt = db()->prepare('UPDATE financial_reports SET title=?, period_month=?, period_year=?, deposit_date=?, category=?, income=?, expense=?, description=?, status=?, document=? WHERE id=?');
             $stmt->execute(array_merge($data, [$document, $id]));
         } else {
-            $stmt = db()->prepare('INSERT INTO financial_reports (title,period_month,period_year,category,income,expense,description,status,document) VALUES (?,?,?,?,?,?,?,?,?)');
+            $stmt = db()->prepare('INSERT INTO financial_reports (title,period_month,period_year,deposit_date,category,income,expense,description,status,document) VALUES (?,?,?,?,?,?,?,?,?,?)');
             $stmt->execute(array_merge($data, [$document]));
         }
         flash('success', 'Laporan keuangan berhasil disimpan.');

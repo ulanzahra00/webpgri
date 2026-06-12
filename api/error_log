@@ -1,0 +1,18 @@
+[03-Jun-2026 05:08:46 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mime_content_type() in /home/pgrikota/public_html/includes/functions.php:429
+Stack trace:
+#0 /home/pgrikota/public_html/api/member_registration.php(25): upload_image()
+#1 {main}
+  thrown in /home/pgrikota/public_html/includes/functions.php on line 429
+[03-Jun-2026 05:10:38 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mime_content_type() in /home/pgrikota/public_html/includes/functions.php:429
+Stack trace:
+#0 /home/pgrikota/public_html/api/member_registration.php(25): upload_image()
+#1 {main}
+  thrown in /home/pgrikota/public_html/includes/functions.php on line 429
+[03-Jun-2026 05:10:48 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function mime_content_type() in /home/pgrikota/public_html/includes/functions.php:429
+Stack trace:
+#0 /home/pgrikota/public_html/api/member_registration.php(25): upload_image()
+#1 {main}
+  thrown in /home/pgrikota/public_html/includes/functions.php on line 429
+[03-Jun-2026 05:15:29 UTC] Member registration error: Upload gagal atau ukuran file melebihi 5MB.
+[03-Jun-2026 05:19:47 UTC] Member registration error: Ukuran file melebihi batas server. Maksimal 5MB.
+[03-Jun-2026 05:20:50 UTC] Member registration error: Ukuran file melebihi batas server. Maksimal file awal 20MB.

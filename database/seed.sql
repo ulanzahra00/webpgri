@@ -28,10 +28,10 @@ INSERT INTO organization_members (name, position, photo, bio, sort_order) VALUES
 ('Hj. Siti Aisyah, S.Pd', 'Sekretaris', 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80', 'Mengelola administrasi dan koordinasi program kerja.', 2),
 ('Rahman Mokoginta, S.Pd', 'Bendahara', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80', 'Mengawal tata kelola keuangan organisasi.', 3);
 
-INSERT INTO financial_reports (title, period_month, period_year, category, income, expense, description, status) VALUES
-('Iuran Anggota Bulan Januari', 1, 2026, 'Iuran Anggota', 12500000, 0, 'Penerimaan iuran anggota PGRI Kotamobagu bulan Januari.', 'published'),
-('Kegiatan Pelatihan Guru Kreatif', 1, 2026, 'Program Kerja', 0, 7350000, 'Pengeluaran konsumsi, narasumber, dan perlengkapan pelatihan guru.', 'published'),
-('Dukungan Mitra Pendidikan', 2, 2026, 'Bantuan / Sponsor', 5000000, 0, 'Penerimaan dukungan kegiatan dari mitra pendidikan daerah.', 'published');
+INSERT INTO financial_reports (title, period_month, period_year, deposit_date, category, income, expense, description, status) VALUES
+('Iuran Anggota Bulan Januari', 1, 2026, '2026-01-10', 'Iuran Anggota', 12500000, 0, 'Penerimaan iuran anggota PGRI Kotamobagu bulan Januari.', 'published'),
+('Kegiatan Pelatihan Guru Kreatif', 1, 2026, '2026-01-18', 'Program Kerja', 0, 7350000, 'Pengeluaran konsumsi, narasumber, dan perlengkapan pelatihan guru.', 'published'),
+('Dukungan Mitra Pendidikan', 2, 2026, '2026-02-12', 'Bantuan / Sponsor', 5000000, 0, 'Penerimaan dukungan kegiatan dari mitra pendidikan daerah.', 'published');
 
 INSERT INTO settings (setting_key, setting_value) VALUES
 ('site_name', 'PGRI Kotamobagu'),

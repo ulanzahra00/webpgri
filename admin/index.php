@@ -7,11 +7,6 @@ $module = $_GET['module'] ?? 'dashboard';
 $action = $_GET['action'] ?? 'list';
 $id = (int)($_GET['id'] ?? 0);
 
-function count_table(string $table): int
-{
-    return (int)db()->query("SELECT COUNT(*) FROM $table")->fetchColumn();
-}
-
 function admin_table_actions(string $module, int $id): string
 {
     return '<a class="btn btn-sm btn-outline-primary" href="' . e(url('admin/?module=' . $module . '&action=form&id=' . $id)) . '"><i class="fa-solid fa-pen"></i></a>
@@ -20,36 +15,13 @@ function admin_table_actions(string $module, int $id): string
 
 if ($module === 'dashboard') {
     ensure_member_registrations_table();
-    db()->prepare('INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)')->execute(['whatsapp_number', '6281234567890']);
-    $whatsappNumber = setting('whatsapp_number', setting('phone'));
-    $whatsappMessage = 'Halo Admin PGRI Kotamobagu, saya ingin bertanya tentang informasi organisasi.';
-    $whatsappUrl = whatsapp_link($whatsappMessage);
     ?>
     <div class="row g-4">
-        <div class="col-md-3"><div class="stat-tile p-4"><i class="fa-solid fa-newspaper text-danger fa-2x mb-2"></i><h3><?= count_table('posts') ?></h3><p>Berita</p></div></div>
-        <div class="col-md-3"><div class="stat-tile p-4"><i class="fa-solid fa-images text-primary fa-2x mb-2"></i><h3><?= count_table('galleries') ?></h3><p>Galeri</p></div></div>
-        <div class="col-md-3"><div class="stat-tile p-4"><i class="fa-solid fa-school text-success fa-2x mb-2"></i><h3><?= count_table('schools') ?></h3><p>Sekolah</p></div></div>
-        <div class="col-md-3"><div class="stat-tile p-4"><i class="fa-solid fa-file-invoice-dollar text-warning fa-2x mb-2"></i><h3><?= count_table('financial_reports') ?></h3><p>Laporan Keuangan</p></div></div>
-        <div class="col-md-3"><div class="stat-tile p-4"><i class="fa-solid fa-user-plus text-primary fa-2x mb-2"></i><h3><?= count_table('member_registrations') ?></h3><p>Registrasi Anggota</p></div></div>
-    </div>
-    <div class="row g-4 mt-1">
-        <div class="col-lg-7"><div class="card card-official h-100"><div class="card-body"><h5>Selamat datang</h5><p class="mb-0">Gunakan menu di sidebar untuk mengelola konten website resmi PGRI Kotamobagu.</p></div></div></div>
-        <div class="col-lg-5">
-            <div class="card card-official whatsapp-card h-100">
+        <div class="col-12">
+            <div class="card card-official">
                 <div class="card-body">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <span class="whatsapp-icon"><i class="fa-brands fa-whatsapp"></i></span>
-                        <div>
-                            <h5 class="mb-0">Chat WhatsApp</h5>
-                            <small>Terhubung langsung ke nomor admin.</small>
-                        </div>
-                    </div>
-                    <label class="form-label">Nomor WhatsApp</label>
-                    <input class="form-control mb-3" value="<?= e($whatsappNumber) ?>" readonly>
-                    <label class="form-label">Pesan otomatis</label>
-                    <textarea class="form-control mb-3" rows="2" readonly><?= e($whatsappMessage) ?></textarea>
-                    <a class="btn btn-success w-100" href="<?= e($whatsappUrl) ?>" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp me-2"></i>Buka Chat WhatsApp</a>
-                    <small class="d-block text-muted mt-2">Nomor dapat diganti melalui menu Pengaturan.</small>
+                    <h5>Selamat datang</h5>
+                    <p class="mb-0">Gunakan menu admin untuk mengelola konten website resmi PGRI Kotamobagu.</p>
                 </div>
             </div>
         </div>
@@ -227,9 +199,10 @@ if ($module === 'dashboard') {
         <?php
     }
 } elseif ($module === 'finance') {
+    ensure_financial_reports_deposit_date_column();
     $months = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     if ($action === 'form') {
-        $row = ['id' => 0, 'title' => '', 'period_month' => date('n'), 'period_year' => date('Y'), 'category' => '', 'income' => 0, 'expense' => 0, 'description' => '', 'document' => '', 'status' => 'published'];
+        $row = ['id' => 0, 'title' => '', 'period_month' => date('n'), 'period_year' => date('Y'), 'deposit_date' => date('Y-m-d'), 'category' => '', 'income' => 0, 'expense' => 0, 'description' => '', 'document' => '', 'status' => 'published'];
         if ($id) { $stmt = db()->prepare('SELECT * FROM financial_reports WHERE id = ?'); $stmt->execute([$id]); $row = $stmt->fetch() ?: $row; }
         ?>
         <h4><?= $id ? 'Edit' : 'Tambah' ?> Laporan Keuangan</h4>
@@ -238,8 +211,9 @@ if ($module === 'dashboard') {
             <div class="row g-3">
                 <div class="col-md-8"><label class="form-label">Judul Laporan</label><input class="form-control" name="title" value="<?= e($row['title']) ?>" required></div>
                 <div class="col-md-4"><label class="form-label">Kategori</label><input class="form-control" name="category" value="<?= e($row['category']) ?>" placeholder="Iuran, Program Kerja, Bantuan" required></div>
-                <div class="col-md-3"><label class="form-label">Bulan</label><select class="form-select" name="period_month"><?php foreach ($months as $number => $name): ?><option value="<?= $number ?>" <?= (int)$row['period_month'] === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
+                <div class="col-md-3"><label class="form-label">Bulan (Januari-Desember)</label><select class="form-select" name="period_month"><?php foreach ($months as $number => $name): ?><option value="<?= $number ?>" <?= (int)$row['period_month'] === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
                 <div class="col-md-3"><label class="form-label">Tahun</label><input class="form-control" type="number" min="2000" max="2100" name="period_year" value="<?= e($row['period_year']) ?>" required></div>
+                <div class="col-md-3"><label class="form-label">Tanggal Setor</label><input class="form-control" type="date" name="deposit_date" value="<?= e($row['deposit_date'] ?? '') ?>" required></div>
                 <div class="col-md-3"><label class="form-label">Pemasukan</label><input class="form-control" type="number" min="0" step="100" name="income" value="<?= e($row['income']) ?>"></div>
                 <div class="col-md-3"><label class="form-label">Pengeluaran</label><input class="form-control" type="number" min="0" step="100" name="expense" value="<?= e($row['expense']) ?>"></div>
                 <div class="col-md-6"><label class="form-label">Dokumen PDF/Excel</label><input class="form-control" type="file" name="document" accept=".pdf,.xls,.xlsx"><small class="text-muted">Maksimal 5MB. Kosongkan jika tidak mengganti.</small></div>
@@ -278,7 +252,7 @@ if ($module === 'dashboard') {
             <input type="hidden" name="module" value="finance">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label">Pilih Bulan</label>
+                    <label class="form-label">Pilih Bulan (Januari-Desember)</label>
                     <select class="form-select" name="bulan">
                         <option value="0">Semua Bulan</option>
                         <?php foreach ($months as $number => $name): ?>
@@ -302,8 +276,8 @@ if ($module === 'dashboard') {
             <div class="col-md-4"><div class="stat-tile p-3"><small>Saldo</small><h5 class="text-primary mb-0"><?= rupiah((float)$totals['balance_total']) ?></h5></div></div>
         </div>
         <input class="form-control mb-3" data-table-search="#adminFinanceTable" placeholder="Cari laporan keuangan...">
-        <div class="card card-official"><div class="table-responsive"><table class="table mb-0 align-middle" id="adminFinanceTable"><thead><tr><th>Periode</th><th>Judul</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
-        <?php foreach ($rows as $row): ?><tr><td><?= e($months[(int)$row['period_month']] ?? '-') ?> <?= e($row['period_year']) ?></td><td><?= e($row['title']) ?></td><td><?= e($row['category']) ?></td><td class="text-success"><?= rupiah((float)$row['income']) ?></td><td class="text-danger"><?= rupiah((float)$row['expense']) ?></td><td class="fw-semibold"><?= rupiah((float)$row['balance']) ?></td><td><?= e($row['status']) ?></td><td><?= admin_table_actions('finance', (int)$row['id']) ?></td></tr><?php endforeach; ?>
+        <div class="card card-official"><div class="table-responsive"><table class="table mb-0 align-middle" id="adminFinanceTable"><thead><tr><th>Periode</th><th>Tanggal Setor</th><th>Judul</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+        <?php foreach ($rows as $row): ?><tr><td><?= e($months[(int)$row['period_month']] ?? '-') ?> <?= e($row['period_year']) ?></td><td><?= !empty($row['deposit_date']) ? e(date('d M Y', strtotime($row['deposit_date']))) : '-' ?></td><td><?= e($row['title']) ?></td><td><?= e($row['category']) ?></td><td class="text-success"><?= rupiah((float)$row['income']) ?></td><td class="text-danger"><?= rupiah((float)$row['expense']) ?></td><td class="fw-semibold"><?= rupiah((float)$row['balance']) ?></td><td><?= e($row['status']) ?></td><td><?= admin_table_actions('finance', (int)$row['id']) ?></td></tr><?php endforeach; ?>
         </tbody></table></div></div>
         <?php
     }
