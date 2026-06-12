@@ -2,6 +2,10 @@
 // Router public sederhana berbasis query string agar cocok untuk shared hosting.
 require_once __DIR__ . '/includes/functions.php';
 
+if (!headers_sent()) {
+    header('Cache-Control: public, max-age=300');
+}
+
 $prettyRoute = public_route_from_request();
 $_GET = array_merge($_GET, $prettyRoute);
 redirect_legacy_public_url();
