@@ -201,6 +201,7 @@ if ($module === 'dashboard') {
 } elseif ($module === 'finance') {
     ensure_financial_reports_deposit_date_column();
     $months = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $periodOptions = [0 => 'Tahunan (Januari-Desember)'] + $months;
     if ($action === 'form') {
         $row = ['id' => 0, 'title' => '', 'period_month' => date('n'), 'period_year' => date('Y'), 'deposit_date' => date('Y-m-d'), 'category' => '', 'income' => 0, 'expense' => 0, 'description' => '', 'document' => '', 'status' => 'published'];
         if ($id) { $stmt = db()->prepare('SELECT * FROM financial_reports WHERE id = ?'); $stmt->execute([$id]); $row = $stmt->fetch() ?: $row; }
@@ -211,7 +212,7 @@ if ($module === 'dashboard') {
             <div class="row g-3">
                 <div class="col-md-8"><label class="form-label">Judul Laporan</label><input class="form-control" name="title" value="<?= e($row['title']) ?>" required></div>
                 <div class="col-md-4"><label class="form-label">Kategori</label><input class="form-control" name="category" value="<?= e($row['category']) ?>" placeholder="Iuran, Program Kerja, Bantuan" required></div>
-                <div class="col-md-3"><label class="form-label">Bulan (Januari-Desember)</label><select class="form-select" name="period_month"><?php foreach ($months as $number => $name): ?><option value="<?= $number ?>" <?= (int)$row['period_month'] === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
+                <div class="col-md-3"><label class="form-label">Periode</label><select class="form-select" name="period_month"><?php foreach ($periodOptions as $number => $name): ?><option value="<?= $number ?>" <?= (int)$row['period_month'] === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
                 <div class="col-md-3"><label class="form-label">Tahun</label><input class="form-control" type="number" min="2000" max="2100" name="period_year" value="<?= e($row['period_year']) ?>" required></div>
                 <div class="col-md-3"><label class="form-label">Tanggal Setor</label><input class="form-control" type="date" name="deposit_date" value="<?= e($row['deposit_date'] ?? '') ?>" required></div>
                 <div class="col-md-3"><label class="form-label">Pemasukan</label><input class="form-control" type="number" min="0" step="100" name="income" value="<?= e($row['income']) ?>"></div>
@@ -224,14 +225,19 @@ if ($module === 'dashboard') {
         </form>
         <?php
     } else {
-        $filterMonth = (int)($_GET['bulan'] ?? 0);
-        if ($filterMonth < 1 || $filterMonth > 12) {
+        $filterMonth = $_GET['bulan'] ?? '';
+        if ($filterMonth === 'annual') {
             $filterMonth = 0;
+        } elseif ($filterMonth !== '') {
+            $filterMonth = (int)$filterMonth;
+            if ($filterMonth < 1 || $filterMonth > 12) {
+                $filterMonth = '';
+            }
         }
 
         $where = '';
         $params = [];
-        if ($filterMonth > 0) {
+        if ($filterMonth !== '') {
             $where = 'WHERE period_month = ?';
             $params[] = $filterMonth;
         }
@@ -252,9 +258,10 @@ if ($module === 'dashboard') {
             <input type="hidden" name="module" value="finance">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label">Pilih Bulan (Januari-Desember)</label>
+                    <label class="form-label">Pilih Periode</label>
                     <select class="form-select" name="bulan">
-                        <option value="0">Semua Bulan</option>
+                        <option value="" <?= $filterMonth === '' ? 'selected' : '' ?>>Semua Periode</option>
+                        <option value="annual" <?= $filterMonth === 0 ? 'selected' : '' ?>>Tahunan (Januari-Desember)</option>
                         <?php foreach ($months as $number => $name): ?>
                             <option value="<?= $number ?>" <?= $filterMonth === $number ? 'selected' : '' ?>><?= e($name) ?></option>
                         <?php endforeach; ?>
@@ -263,7 +270,7 @@ if ($module === 'dashboard') {
                 <div class="col-md-auto">
                     <button class="btn btn-pgri"><i class="fa-solid fa-filter me-2"></i>Filter</button>
                 </div>
-                <?php if ($filterMonth > 0): ?>
+                <?php if ($filterMonth !== ''): ?>
                     <div class="col-md-auto">
                         <a class="btn btn-outline-secondary" href="<?= e(url('admin/?module=finance')) ?>">Reset</a>
                     </div>
@@ -277,7 +284,7 @@ if ($module === 'dashboard') {
         </div>
         <input class="form-control mb-3" data-table-search="#adminFinanceTable" placeholder="Cari laporan keuangan...">
         <div class="card card-official"><div class="table-responsive"><table class="table mb-0 align-middle" id="adminFinanceTable"><thead><tr><th>Periode</th><th>Tanggal Setor</th><th>Judul</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
-        <?php foreach ($rows as $row): ?><tr><td><?= e($months[(int)$row['period_month']] ?? '-') ?> <?= e($row['period_year']) ?></td><td><?= !empty($row['deposit_date']) ? e(date('d M Y', strtotime($row['deposit_date']))) : '-' ?></td><td><?= e($row['title']) ?></td><td><?= e($row['category']) ?></td><td class="text-success"><?= rupiah((float)$row['income']) ?></td><td class="text-danger"><?= rupiah((float)$row['expense']) ?></td><td class="fw-semibold"><?= rupiah((float)$row['balance']) ?></td><td><?= e($row['status']) ?></td><td><?= admin_table_actions('finance', (int)$row['id']) ?></td></tr><?php endforeach; ?>
+        <?php foreach ($rows as $row): ?><tr><td><?= e($periodOptions[(int)$row['period_month']] ?? '-') ?> <?= e($row['period_year']) ?></td><td><?= !empty($row['deposit_date']) ? e(date('d M Y', strtotime($row['deposit_date']))) : '-' ?></td><td><?= e($row['title']) ?></td><td><?= e($row['category']) ?></td><td class="text-success"><?= rupiah((float)$row['income']) ?></td><td class="text-danger"><?= rupiah((float)$row['expense']) ?></td><td class="fw-semibold"><?= rupiah((float)$row['balance']) ?></td><td><?= e($row['status']) ?></td><td><?= admin_table_actions('finance', (int)$row['id']) ?></td></tr><?php endforeach; ?>
         </tbody></table></div></div>
         <?php
     }

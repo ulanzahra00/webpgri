@@ -308,10 +308,18 @@ if ($page === 'profil') {
 } elseif ($page === 'keuangan') {
     ensure_financial_reports_deposit_date_column();
     $year = (int)($_GET['tahun'] ?? date('Y'));
-    $month = (int)($_GET['bulan'] ?? 0);
+    $month = $_GET['bulan'] ?? '';
     $params = [$year];
     $where = 'WHERE status = "published" AND period_year = ?';
-    if ($month > 0) {
+    if ($month === 'annual') {
+        $month = 0;
+    } elseif ($month !== '') {
+        $month = (int)$month;
+        if ($month < 1 || $month > 12) {
+            $month = '';
+        }
+    }
+    if ($month !== '') {
         $where .= ' AND period_month = ?';
         $params[] = $month;
     }
@@ -323,6 +331,7 @@ if ($page === 'profil') {
     $summary->execute($params);
     $totals = $summary->fetch();
     $months = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $periodOptions = [0 => 'Tahunan (Januari-Desember)'] + $months;
     ?>
     <header class="page-header page-header-finance"><div class="container"><h1>Laporan Keuangan</h1><p class="lead mb-0">Transparansi pemasukan dan pengeluaran organisasi PGRI Kotamobagu.</p></div></header>
     <section class="section-band section-soft">
@@ -335,7 +344,7 @@ if ($page === 'profil') {
             <form class="row g-3 mb-4" method="get">
                 <input type="hidden" name="page" value="keuangan">
                 <div class="col-md-4"><select class="form-select" name="tahun"><?php foreach ($years as $item): ?><option value="<?= e($item['period_year']) ?>" <?= $year === (int)$item['period_year'] ? 'selected' : '' ?>><?= e($item['period_year']) ?></option><?php endforeach; ?></select></div>
-                <div class="col-md-4"><select class="form-select" name="bulan"><option value="0">Semua Bulan</option><?php foreach ($months as $number => $name): ?><option value="<?= $number ?>" <?= $month === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
+                <div class="col-md-4"><select class="form-select" name="bulan"><option value="" <?= $month === '' ? 'selected' : '' ?>>Semua Periode</option><option value="annual" <?= $month === 0 ? 'selected' : '' ?>>Tahunan (Januari-Desember)</option><?php foreach ($months as $number => $name): ?><option value="<?= $number ?>" <?= $month === $number ? 'selected' : '' ?>><?= e($name) ?></option><?php endforeach; ?></select></div>
                 <div class="col-md-2"><button class="btn btn-pgri w-100"><i class="fa-solid fa-filter me-2"></i>Filter</button></div>
                 <div class="col-md-2"><a class="btn btn-outline-primary w-100" href="<?= e(url('api/export_finance.php')) ?>"><i class="fa-solid fa-file-csv me-2"></i>CSV</a></div>
             </form>
@@ -343,7 +352,7 @@ if ($page === 'profil') {
             <div class="card card-official"><div class="table-responsive"><table class="table table-bordered align-middle mb-0" id="financeTable"><thead><tr><th>Periode</th><th>Tanggal Setor</th><th>Uraian</th><th>Kategori</th><th>Pemasukan</th><th>Pengeluaran</th><th>Saldo</th><th>Dokumen</th></tr></thead><tbody>
                 <?php foreach ($reports as $report): ?>
                     <tr>
-                        <td><?= e($months[(int)$report['period_month']] ?? '-') ?> <?= e($report['period_year']) ?></td>
+                        <td><?= e($periodOptions[(int)$report['period_month']] ?? '-') ?> <?= e($report['period_year']) ?></td>
                         <td><?= !empty($report['deposit_date']) ? e(date('d M Y', strtotime($report['deposit_date']))) : '-' ?></td>
                         <td><strong><?= e($report['title']) ?></strong><br><small><?= e($report['description']) ?></small></td>
                         <td><?= e($report['category']) ?></td>

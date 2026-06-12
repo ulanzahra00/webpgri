@@ -7,14 +7,16 @@ header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename=laporan-keuangan-pgri-kotamobagu.csv');
 
 $output = fopen('php://output', 'w');
-fputcsv($output, ['Judul', 'Bulan', 'Tahun', 'Tanggal Setor', 'Kategori', 'Pemasukan', 'Pengeluaran', 'Saldo', 'Status', 'Keterangan']);
+fputcsv($output, ['Judul', 'Periode', 'Tahun', 'Tanggal Setor', 'Kategori', 'Pemasukan', 'Pengeluaran', 'Saldo', 'Status', 'Keterangan']);
 
 $where = current_admin() ? '' : 'WHERE status = "published"';
 $rows = db()->query("SELECT * FROM financial_reports $where ORDER BY period_year DESC, period_month DESC, id DESC")->fetchAll();
+$months = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+$periodOptions = [0 => 'Tahunan (Januari-Desember)'] + $months;
 foreach ($rows as $row) {
     fputcsv($output, [
         $row['title'],
-        $row['period_month'],
+        $periodOptions[(int)$row['period_month']] ?? $row['period_month'],
         $row['period_year'],
         $row['deposit_date'],
         $row['category'],
