@@ -3,7 +3,8 @@
 require_once __DIR__ . '/includes/functions.php';
 
 if (!headers_sent()) {
-    header('Cache-Control: public, max-age=300');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('X-Robots-Tag: noindex, nofollow');
 }
 
 $prettyRoute = public_route_from_request();

@@ -32,6 +32,8 @@ $activeNavLabel = $navItems[$activeNavKey]['label'] ?? 'Menu';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="<?= e($metaDescription) ?>">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
     <meta name="keywords" content="PGRI Kotamobagu, guru, pendidikan, organisasi, sekolah">
     <meta property="og:locale" content="id_ID">
     <meta property="og:site_name" content="<?= e($siteName) ?>">

@@ -1,3 +1,6 @@
+# Mencegah indexing oleh search engine
+Header set X-Robots-Tag "noindex, nofollow"
+
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
