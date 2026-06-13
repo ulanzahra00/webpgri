@@ -398,7 +398,7 @@ if ($module === 'dashboard') {
                 <div class="col-md-4">
                     <label class="form-label">Kategori</label>
                     <select class="form-select" name="category">
-                        <?php $existingCats = array_unique(array_merge($defaultCategories, array_map(fn($c) => $c['category'], $categories))); ?>
+                        <?php $existingCats = array_unique(array_merge($defaultCategories, array_map(function($c) { return $c['category']; }, $categories))); ?>
                         <?php foreach ($existingCats as $cat): ?>
                             <option value="<?= e($cat) ?>" <?= $row['category'] === $cat ? 'selected' : '' ?>><?= e($cat) ?></option>
                         <?php endforeach; ?>

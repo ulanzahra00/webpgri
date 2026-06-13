@@ -543,7 +543,7 @@ function read_csv_rows(string $filePath): array
 
     // Hapus BOM UTF-8 jika ada
     $bom = "\xEF\xBB\xBF";
-    if (str_starts_with($firstLine, $bom)) {
+    if (starts_with($firstLine, $bom)) {
         $firstLine = substr($firstLine, strlen($bom));
     }
 
