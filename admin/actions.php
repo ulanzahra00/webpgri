@@ -220,6 +220,71 @@ try {
         flash('success', 'Laporan keuangan berhasil disimpan.');
     }
 
+    if ($module === 'documents') {
+        ensure_documents_table();
+
+        $id = (int)($_POST['id'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $category = trim($_POST['category'] ?? 'Umum');
+        $file = $_FILES['file_document'] ?? [];
+
+        if ($id) {
+            // Edit judul/deskripsi/kategori, opsional ganti file
+            $old = db()->prepare('SELECT * FROM documents WHERE id = ?');
+            $old->execute([$id]);
+            $oldRow = $old->fetch();
+
+            $uploaded = null;
+            if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                // Hapus file lama
+                if ($oldRow && $oldRow['file_path']) {
+                    $oldFilePath = __DIR__ . '/..' . $oldRow['file_path'];
+                    if (is_file($oldFilePath)) {
+                        @unlink($oldFilePath);
+                    }
+                }
+                $uploaded = upload_any_file($file, 'dokumen');
+            }
+
+            $stmt = db()->prepare('UPDATE documents SET title=?, description=?, category=?, filename=IFNULL(?,filename), original_name=IFNULL(?,original_name), file_path=IFNULL(?,file_path), file_size=IFNULL(?,file_size), file_type=IFNULL(?,file_type), file_extension=IFNULL(?,file_extension) WHERE id=?');
+            $stmt->execute([
+                $title,
+                $description,
+                $category,
+                $uploaded['filename'] ?? null,
+                $uploaded['original_name'] ?? null,
+                $uploaded['file_path'] ?? null,
+                $uploaded['file_size'] ?? null,
+                $uploaded['file_type'] ?? null,
+                $uploaded['file_extension'] ?? null,
+                $id,
+            ]);
+            flash('success', 'Dokumen berhasil diperbarui.');
+        } else {
+            // Upload baru
+            $uploaded = upload_any_file($file, 'dokumen');
+            if (!$uploaded) {
+                throw new RuntimeException('File harus dipilih.');
+            }
+
+            $stmt = db()->prepare('INSERT INTO documents (title, filename, original_name, file_path, file_size, file_type, file_extension, description, category) VALUES (?,?,?,?,?,?,?,?,?)');
+            $stmt->execute([
+                $title ?: $uploaded['original_name'],
+                $uploaded['filename'],
+                $uploaded['original_name'],
+                $uploaded['file_path'],
+                $uploaded['file_size'],
+                $uploaded['file_type'],
+                $uploaded['file_extension'],
+                $description,
+                $category,
+            ]);
+            flash('success', 'Dokumen berhasil diupload.');
+        }
+        redirect('admin/?module=documents');
+    }
+
     if ($module === 'members') {
         $id = (int)($_POST['id'] ?? 0);
         $photo = upload_image($_FILES['photo'] ?? [], 'pengurus');

@@ -15,6 +15,7 @@ $adminNavItems = [
     'member_registrations' => ['label' => 'Registrasi Anggota', 'href' => url('admin/?module=member_registrations'), 'icon' => 'fa-user-plus'],
     'users' => ['label' => 'User', 'href' => url('admin/?module=users'), 'icon' => 'fa-users-gear'],
     'messages' => ['label' => 'Keluhan', 'href' => url('admin/?module=messages'), 'icon' => 'fa-envelope'],
+    'documents' => ['label' => 'Dokumen', 'href' => url('admin/?module=documents'), 'icon' => 'fa-folder-open'],
     'settings' => ['label' => 'Pengaturan', 'href' => url('admin/?module=settings'), 'icon' => 'fa-gear'],
 ];
 $activeAdminLabel = $adminNavItems[$active]['label'] ?? 'Menu Admin';

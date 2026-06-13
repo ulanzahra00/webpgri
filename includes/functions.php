@@ -912,6 +912,113 @@ function upload_document(array $file, string $folder): ?string
     return '/uploads/' . $folder . '/' . $name;
 }
 
+function ensure_documents_table(): void
+{
+    static $checked = false;
+    if ($checked) {
+        return;
+    }
+
+    db()->exec("
+        CREATE TABLE IF NOT EXISTS documents (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL DEFAULT '',
+            filename VARCHAR(255) NOT NULL,
+            original_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500) NOT NULL,
+            file_size BIGINT NOT NULL DEFAULT 0,
+            file_type VARCHAR(100) NOT NULL DEFAULT '',
+            file_extension VARCHAR(20) NOT NULL DEFAULT '',
+            description TEXT NULL,
+            category VARCHAR(100) NOT NULL DEFAULT 'Umum',
+            downloads INT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+    $checked = true;
+}
+
+function format_file_size(int $bytes): string
+{
+    if ($bytes >= 1073741824) {
+        return number_format($bytes / 1073741824, 2) . ' GB';
+    }
+    if ($bytes >= 1048576) {
+        return number_format($bytes / 1048576, 1) . ' MB';
+    }
+    if ($bytes >= 1024) {
+        return number_format($bytes / 1024, 1) . ' KB';
+    }
+    return $bytes . ' B';
+}
+
+function get_file_icon(string $extension): string
+{
+    $icons = [
+        'pdf' => 'fa-file-pdf text-danger',
+        'doc' => 'fa-file-word text-primary',
+        'docx' => 'fa-file-word text-primary',
+        'xls' => 'fa-file-excel text-success',
+        'xlsx' => 'fa-file-excel text-success',
+        'ppt' => 'fa-file-powerpoint text-warning',
+        'pptx' => 'fa-file-powerpoint text-warning',
+        'jpg' => 'fa-file-image text-info',
+        'jpeg' => 'fa-file-image text-info',
+        'png' => 'fa-file-image text-info',
+        'gif' => 'fa-file-image text-info',
+        'webp' => 'fa-file-image text-info',
+        'zip' => 'fa-file-zipper text-secondary',
+        'rar' => 'fa-file-zipper text-secondary',
+        '7z' => 'fa-file-zipper text-secondary',
+        'txt' => 'fa-file-lines text-muted',
+        'mp4' => 'fa-file-video text-purple',
+        'mp3' => 'fa-file-audio text-warning',
+    ];
+
+    $extension = strtolower($extension);
+    return $icons[$extension] ?? 'fa-file text-muted';
+}
+
+function upload_any_file(array $file, string $folder, int $maxBytes = 104857600): ?array
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        throw new RuntimeException('Upload gagal. Silakan pilih ulang file.');
+    }
+
+    if (($file['size'] ?? 0) > $maxBytes) {
+        $maxMB = $maxBytes / 1048576;
+        throw new RuntimeException('Ukuran file melebihi batas maksimal ' . $maxMB . 'MB.');
+    }
+
+    $dir = __DIR__ . '/../uploads/' . $folder;
+    if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        throw new RuntimeException('Folder upload belum bisa dibuat.');
+    }
+
+    $originalName = $file['name'];
+    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    $filename = uniqid($folder . '-', true) . '.' . $extension;
+    $target = $dir . '/' . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $target)) {
+        throw new RuntimeException('Gagal menyimpan file.');
+    }
+
+    return [
+        'filename' => $filename,
+        'original_name' => $originalName,
+        'file_path' => '/uploads/' . $folder . '/' . $filename,
+        'file_size' => $file['size'],
+        'file_type' => $file['type'] ?? '',
+        'file_extension' => $extension,
+    ];
+}
+
 function rupiah(float $value): string
 {
     return 'Rp ' . number_format($value, 0, ',', '.');
