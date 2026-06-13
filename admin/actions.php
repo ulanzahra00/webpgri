@@ -70,12 +70,25 @@ if ($action === 'delete') {
         'member_registrations' => 'member_registrations',
         'users' => 'users',
         'messages' => 'contact_messages',
+        'documents' => 'documents',
     ];
 
     if (isset($tables[$module]) && $id > 0) {
         if ($module === 'users' && $id === (int)current_admin()['id']) {
             flash('danger', 'User yang sedang login tidak dapat dihapus.');
         } else {
+            // Hapus file fisik untuk dokumen
+            if ($module === 'documents') {
+                $stmt = db()->prepare('SELECT file_path FROM documents WHERE id = ?');
+                $stmt->execute([$id]);
+                $filePath = $stmt->fetchColumn();
+                if ($filePath) {
+                    $fullPath = __DIR__ . '/..' . $filePath;
+                    if (is_file($fullPath)) {
+                        @unlink($fullPath);
+                    }
+                }
+            }
             $stmt = db()->prepare('DELETE FROM ' . $tables[$module] . ' WHERE id = ?');
             $stmt->execute([$id]);
             flash('success', 'Data berhasil dihapus.');
