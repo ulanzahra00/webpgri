@@ -267,6 +267,10 @@ if ($page === 'profil') {
     <header class="page-header page-header-members"><div class="container"><h1>Registrasi Anggota</h1><p class="lead mb-0">Direktori anggota PGRI Kotamobagu yang telah diverifikasi oleh sekretariat.</p></div></header>
     <section class="section-band section-soft">
         <div class="container">
+            <div class="alert alert-warning mb-4">
+                <h6 class="alert-heading mb-2"><i class="fa-solid fa-circle-info me-2"></i>Registrasi anggota sementara ditutup</h6>
+                <p class="mb-0">Pendaftaran anggota baru melalui website sedang dinonaktifkan sementara. Silakan hubungi sekretariat PGRI Kotamobagu untuk informasi pendaftaran atau pembaruan data anggota.</p>
+            </div>
             <div class="d-flex flex-wrap gap-3 justify-content-between align-items-end mb-4">
                 <div>
                     <h2 class="section-title mb-0">Direktori Anggota</h2>
