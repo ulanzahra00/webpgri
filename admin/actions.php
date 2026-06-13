@@ -129,13 +129,26 @@ try {
     }
 
     if ($module === 'schools') {
+        // Pastikan UNIQUE constraint ada agar tidak terjadi duplikat
+        try {
+            $checkConstraint = db()->query("SHOW INDEX FROM schools WHERE Key_name = 'uq_school_name_district'")->fetch();
+            if (!$checkConstraint) {
+                // Hapus duplikat dulu (keep id terkecil)
+                db()->exec("DELETE s1 FROM schools s1 INNER JOIN schools s2 WHERE s1.id > s2.id AND s1.name = s2.name AND s1.district = s2.district");
+                // Baru tambah UNIQUE index
+                db()->exec("ALTER TABLE schools ADD UNIQUE INDEX uq_school_name_district (name, district)");
+            }
+        } catch (PDOException $e) {
+            // Abaikan error jika index sudah ada atau gagal
+        }
+
         if ($action === 'import') {
             $rows = read_school_import_file($_FILES['school_file'] ?? []);
             if (!$rows) {
                 throw new RuntimeException('Tidak ada baris data valid untuk diimport.');
             }
 
-            $stmt = db()->prepare('INSERT INTO schools (name, level, district, address, headmaster, phone) VALUES (?,?,?,?,?,?)');
+            $stmt = db()->prepare('INSERT IGNORE INTO schools (name, level, district, address, headmaster, phone) VALUES (?,?,?,?,?,?)');
             $imported = 0;
             foreach ($rows as $row) {
                 $stmt->execute([
@@ -146,10 +159,12 @@ try {
                     $row['headmaster'],
                     $row['phone'],
                 ]);
-                $imported++;
+                if ($stmt->rowCount() > 0) {
+                    $imported++;
+                }
             }
 
-            flash('success', $imported . ' data sekolah berhasil diimport.');
+            flash('success', $imported . ' data sekolah baru berhasil diimport (duplikat dilewati).');
             redirect('admin/?module=schools');
         }
 
@@ -159,6 +174,14 @@ try {
             $stmt = db()->prepare('UPDATE schools SET name=?, level=?, district=?, address=?, headmaster=?, phone=? WHERE id=?');
             $stmt->execute(array_merge($data, [$id]));
         } else {
+            // Cek dulu apakah sudah ada data dengan nama + kecamatan yang sama
+            $existing = db()->prepare('SELECT id FROM schools WHERE name = ? AND district = ? LIMIT 1');
+            $existing->execute([$data[0], $data[2]]);
+            $existingId = $existing->fetchColumn();
+            if ($existingId) {
+                flash('warning', 'Data sekolah "' . e($data[0]) . '" di Kecamatan ' . e($data[2]) . ' sudah ada. Gunakan edit untuk mengubah.');
+                redirect('admin/?module=schools');
+            }
             $stmt = db()->prepare('INSERT INTO schools (name,level,district,address,headmaster,phone) VALUES (?,?,?,?,?,?)');
             $stmt->execute($data);
         }
