@@ -1,6 +1,17 @@
 <?php
 // Helper umum untuk sanitasi, auth, upload, flash message, dan query kecil.
-if (session_status() === PHP_SESSION_NONE) {
+function is_link_preview_crawler(): bool
+{
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    return (bool)preg_match('/WhatsApp|facebookexternalhit|Facebot|Twitterbot|LinkedInBot|TelegramBot|Slackbot|Discordbot/i', $userAgent);
+}
+
+function ensure_session_started(): void
+{
+    if (session_status() !== PHP_SESSION_NONE) {
+        return;
+    }
+
     $isSecureRequest = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
@@ -15,6 +26,10 @@ if (session_status() === PHP_SESSION_NONE) {
         'samesite' => 'Lax',
     ]);
     session_start();
+}
+
+if (!is_link_preview_crawler()) {
+    ensure_session_started();
 }
 
 const ADMIN_SESSION_TIMEOUT = 1800;
@@ -280,11 +295,13 @@ function redirect(string $path): void
 
 function flash(string $type, string $message): void
 {
+    ensure_session_started();
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
 
 function get_flash(): ?array
 {
+    ensure_session_started();
     $flash = $_SESSION['flash'] ?? null;
     unset($_SESSION['flash']);
     return $flash;
@@ -292,6 +309,7 @@ function get_flash(): ?array
 
 function current_admin(): ?array
 {
+    ensure_session_started();
     $admin = $_SESSION['admin'] ?? null;
     if (!$admin) {
         return null;
@@ -317,6 +335,7 @@ function require_admin(): void
 
 function csrf_token(): string
 {
+    ensure_session_started();
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
@@ -326,6 +345,7 @@ function csrf_token(): string
 
 function verify_csrf(): void
 {
+    ensure_session_started();
     $token = $_POST['csrf_token'] ?? '';
     if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
         flash('danger', 'Sesi tidak valid. Silakan ulangi aksi.');
@@ -487,6 +507,23 @@ function map_school_import_rows(array $rows): array
     return $mappedRows;
 }
 
+function detect_csv_delimiter(string $filePath): string
+{
+    $sample = file_get_contents($filePath, false, null, 0, 4096);
+    if ($sample === false) {
+        return ',';
+    }
+
+    $commaCount = substr_count($sample, ',');
+    $semicolonCount = substr_count($sample, ';');
+
+    if ($semicolonCount > $commaCount) {
+        return ';';
+    }
+
+    return ',';
+}
+
 function read_csv_rows(string $filePath): array
 {
     $handle = fopen($filePath, 'r');
@@ -494,8 +531,33 @@ function read_csv_rows(string $filePath): array
         throw new RuntimeException('Tidak dapat membaca file CSV.');
     }
 
+    $delimiter = detect_csv_delimiter($filePath);
     $rows = [];
-    while (($row = fgetcsv($handle)) !== false) {
+
+    // Baca baris pertama untuk deteksi BOM
+    $firstLine = fgets($handle);
+    if ($firstLine === false) {
+        fclose($handle);
+        return [];
+    }
+
+    // Hapus BOM UTF-8 jika ada
+    $bom = "\xEF\xBB\xBF";
+    if (str_starts_with($firstLine, $bom)) {
+        $firstLine = substr($firstLine, strlen($bom));
+    }
+
+    // Parse baris pertama sebagai header
+    $headerRow = str_getcsv($firstLine, $delimiter);
+    if ($headerRow !== [null] && $headerRow !== false) {
+        $rows[] = $headerRow;
+    }
+
+    // Lanjutkan baca baris sisanya
+    while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+        if (count($row) === 1 && ($row[0] === null || $row[0] === '')) {
+            continue;
+        }
         $rows[] = $row;
     }
     fclose($handle);
