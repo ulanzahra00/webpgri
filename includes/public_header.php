@@ -18,6 +18,7 @@ $navItems = [
     'profil' => ['label' => 'Profil', 'href' => url('?page=profil'), 'icon' => 'fa-id-card'],
     'berita' => ['label' => 'Berita', 'href' => url('?page=berita'), 'icon' => 'fa-newspaper'],
     'sekolah' => ['label' => 'Data Sekolah', 'href' => url('?page=sekolah'), 'icon' => 'fa-school'],
+    'dokumen' => ['label' => 'Dokumen', 'href' => url('?page=dokumen'), 'icon' => 'fa-folder-open'],
     'anggota' => ['label' => 'Anggota', 'href' => url('?page=anggota'), 'icon' => 'fa-users'],
     'keuangan' => ['label' => 'Keuangan', 'href' => url('?page=keuangan'), 'icon' => 'fa-wallet'],
     'galeri' => ['label' => 'Galeri', 'href' => url('?page=galeri'), 'icon' => 'fa-images'],

@@ -165,7 +165,7 @@ function public_route_from_request(): array
         return ['page' => 'detail', 'slug' => rawurldecode($segments[1])];
     }
 
-    $allowedPages = ['profil', 'berita', 'sekolah', 'anggota', 'keuangan', 'galeri', 'kontak'];
+    $allowedPages = ['profil', 'berita', 'sekolah', 'anggota', 'keuangan', 'galeri', 'kontak', 'dokumen'];
     if (in_array($segments[0] ?? '', $allowedPages, true)) {
         return ['page' => $segments[0]];
     }

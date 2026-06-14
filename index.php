@@ -425,6 +425,61 @@ if ($page === 'profil') {
         <?php foreach ($galleries as $item): ?><div class="col-md-6 col-lg-4"><div class="gallery-item" data-lightbox="<?= e(media_url($item['image'])) ?>"><img loading="lazy" src="<?= e(media_url($item['image'])) ?>" alt="<?= e($item['title']) ?>"><h5 class="mt-3"><?= e($item['title']) ?></h5><p class="text-muted"><?= e($item['description']) ?></p></div></div><?php endforeach; ?>
     </div></div></section>
     <?php
+} elseif ($page === 'dokumen') {
+    ensure_documents_table();
+    $keyword = trim($_GET['q'] ?? '');
+    $catFilter = trim($_GET['category'] ?? '');
+    $where = '1=1';
+    $params = [];
+    if ($keyword !== '') { $where .= ' AND (title LIKE ? OR original_name LIKE ? OR description LIKE ?)'; $like = '%' . $keyword . '%'; array_push($params, $like, $like, $like); }
+    if ($catFilter !== '') { $where .= ' AND category = ?'; $params[] = $catFilter; }
+    $stmt = db()->prepare("SELECT * FROM documents WHERE $where ORDER BY created_at DESC");
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll();
+    $filterCategories = db()->query('SELECT DISTINCT category FROM documents ORDER BY category')->fetchAll();
+    ?>
+    <header class="page-header page-header-docs"><div class="container"><h1>Dokumen & Arsip</h1><p class="lead mb-0">Kumpulan dokumen resmi, surat edaran, laporan, dan pedoman organisasi PGRI Kotamobagu.</p></div></header>
+    <section class="section-band section-soft">
+        <div class="container">
+            <form class="row g-2 mb-4" method="get">
+                <input type="hidden" name="page" value="dokumen">
+                <div class="col-md-5"><input class="form-control" name="q" value="<?= e($keyword) ?>" placeholder="Cari judul atau nama file..."></div>
+                <div class="col-md-3"><select class="form-select" name="category"><option value="">Semua Kategori</option><?php foreach ($filterCategories as $fc): ?><option value="<?= e($fc['category']) ?>" <?= $catFilter === $fc['category'] ? 'selected' : '' ?>><?= e($fc['category']) ?></option><?php endforeach; ?></select></div>
+                <div class="col-md-2"><button class="btn btn-pgri w-100"><i class="fa-solid fa-filter me-1"></i>Filter</button></div>
+                <div class="col-md-2"><a class="btn btn-outline-secondary w-100" href="<?= e(url('?page=dokumen')) ?>"><i class="fa-solid fa-rotate me-1"></i>Reset</a></div>
+            </form>
+            <?php if ($rows): ?>
+            <div class="row g-3">
+                <?php foreach ($rows as $row): ?>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card card-official h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <i class="fa-solid <?= get_file_icon($row['file_extension']) ?> fa-3x"></i>
+                                <div class="min-w-0">
+                                    <h5 class="mb-1" style="font-size:1rem"><?= e($row['title'] ?: $row['original_name']) ?></h5>
+                                    <small class="text-muted d-block"><?= e($row['original_name']) ?></small>
+                                    <small class="text-muted"><?= format_file_size((int)$row['file_size']) ?> | <?= e($row['category']) ?> | Diunduh <?= e((string)$row['downloads']) ?>x</small>
+                                </div>
+                            </div>
+                            <?php if ($row['description']): ?><p class="small mb-3"><?= e(mb_substr($row['description'], 0, 120)) ?><?= strlen($row['description']) > 120 ? '...' : '' ?></p><?php endif; ?>
+                            <a class="btn btn-pgri btn-sm w-100" href="<?= e(media_url($row['file_path'])) ?>" target="_blank" rel="noopener"><i class="fa-solid fa-download me-1"></i>Unduh Dokumen</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <p class="text-muted small mt-3">Total: <?= count($rows) ?> dokumen</p>
+            <?php else: ?>
+            <div class="card card-official p-5 text-center">
+                <i class="fa-solid fa-folder-open fa-4x text-muted mb-3"></i>
+                <h5>Belum ada dokumen</h5>
+                <p class="text-muted mb-0">Dokumen resmi organisasi akan tampil di sini setelah diunggah oleh admin.</p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php
 } elseif ($page === 'kontak') {
     $flash = get_flash();
     ?>
