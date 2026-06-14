@@ -221,6 +221,60 @@ try {
         foreach ($rows as $row) { echo '<tr><td><strong>' . e($row['name']) . '</strong><br><small>' . e($row['email']) . '</small></td><td>' . e($row['subject']) . '</td><td>' . e($row['message']) . '</td><td><a data-confirm="Hapus?" class="btn btn-sm btn-outline-danger" href="' . e(url('admin/actions.php?module=messages&action=delete&id=' . (int)$row['id'] . '&csrf_token=' . csrf_token())) . '"><i class="fa-solid fa-trash"></i></a></td></tr>'; }
         echo '</tbody></table></div>';
         $output = ob_get_clean();
+    } elseif ($module === 'documents') {
+        ensure_documents_table();
+        ob_start();
+        if ($action === 'form') {
+            $row = ['id' => 0, 'title' => '', 'description' => '', 'category' => 'Umum', 'filename' => '', 'original_name' => '', 'file_path' => '', 'file_size' => 0, 'file_extension' => ''];
+            if ($id) {
+                $stmt = db()->prepare('SELECT * FROM documents WHERE id = ?');
+                $stmt->execute([$id]);
+                $row = $stmt->fetch() ?: $row;
+            }
+            $categories = db()->query('SELECT DISTINCT category FROM documents ORDER BY category')->fetchAll();
+            $defaultCategories = ['Umum', 'Surat Edaran', 'SK Pengurus', 'Laporan', 'Pedoman', 'Notulen'];
+            ?><h4><?= $id ? 'Edit' : 'Upload' ?> Dokumen</h4>
+            <form class="card card-official p-4" method="post" action="<?= e(url('admin/actions.php')) ?>" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+            <input type="hidden" name="module" value="documents">
+            <input type="hidden" name="id" value="<?= e((string)$row['id']) ?>">
+            <div class="row g-3">
+            <div class="col-md-8"><label class="form-label">Judul Dokumen <span class="text-danger">*</span></label><input class="form-control" name="title" value="<?= e($row['title']) ?>" required></div>
+            <div class="col-md-4"><label class="form-label">Kategori</label>
+            <select class="form-select" name="category"><?php $existingCats = array_unique(array_merge($defaultCategories, array_map(function($c) { return $c['category']; }, $categories))); ?><?php foreach ($existingCats as $cat): ?><option value="<?= e($cat) ?>" <?= $row['category'] === $cat ? 'selected' : '' ?>><?= e($cat) ?></option><?php endforeach; ?><option value="" disabled>── Tulis manual ──</option></select></div>
+            <div class="col-12"><label class="form-label">Deskripsi</label><textarea class="form-control" name="description" rows="3"><?= e($row['description']) ?></textarea></div>
+            <div class="col-12"><label class="form-label">File <?= !$id ? '<span class="text-danger">*</span>' : '' ?></label>
+            <?php if ($id && $row['file_path']): ?>
+            <div class="d-flex align-items-center gap-3 mb-2 p-3 bg-light rounded"><i class="fa-solid <?= get_file_icon($row['file_extension']) ?> fa-2x"></i><div><strong><?= e($row['original_name']) ?></strong><br><small class="text-muted"><?= format_file_size((int)$row['file_size']) ?></small></div><a class="btn btn-sm btn-outline-primary ms-auto" href="<?= e(media_url($row['file_path'])) ?>" target="_blank"><i class="fa-solid fa-eye"></i> Lihat</a></div>
+            <input class="form-control" type="file" name="file_document"><small class="text-muted">Kosongkan jika tidak mengganti. Maksimal 100MB.</small>
+            <?php else: ?>
+            <input class="form-control" type="file" name="file_document" required><small class="text-muted">Maksimal 100MB. Semua format file didukung.</small>
+            <?php endif; ?>
+            </div></div>
+            <button class="btn btn-pgri mt-4"><i class="fa-solid fa-upload me-2"></i><?= $id ? 'Simpan Perubahan' : 'Upload Dokumen' ?></button></form><?php
+        } else {
+            $keyword = trim($_GET['q'] ?? '');
+            $catFilter = trim($_GET['category'] ?? '');
+            $where = '1=1';
+            $params = [];
+            if ($keyword !== '') { $where .= ' AND (title LIKE ? OR original_name LIKE ? OR description LIKE ?)'; $like = '%' . $keyword . '%'; array_push($params, $like, $like, $like); }
+            if ($catFilter !== '') { $where .= ' AND category = ?'; $params[] = $catFilter; }
+            $stmt = db()->prepare("SELECT * FROM documents WHERE $where ORDER BY created_at DESC");
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll();
+            $filterCategories = db()->query('SELECT DISTINCT category FROM documents ORDER BY category')->fetchAll();
+            ?><div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h4 class="mb-0">Dokumen</h4><a class="btn btn-pgri" href="<?= e(url('admin/?module=documents&action=form')) ?>"><i class="fa-solid fa-upload me-1"></i>Upload Dokumen</a></div>
+            <form class="row g-2 mb-3" method="get"><input type="hidden" name="module" value="documents"><div class="col-md-5"><input class="form-control" name="q" value="<?= e($keyword) ?>" placeholder="Cari judul, nama file..."></div><div class="col-md-3"><select class="form-select" name="category"><option value="">Semua Kategori</option><?php foreach ($filterCategories as $fc): ?><option value="<?= e($fc['category']) ?>" <?= $catFilter === $fc['category'] ? 'selected' : '' ?>><?= e($fc['category']) ?></option><?php endforeach; ?></select></div><div class="col-md-2"><button class="btn btn-outline-primary w-100"><i class="fa-solid fa-filter me-1"></i>Filter</button></div><div class="col-md-2"><a class="btn btn-outline-secondary w-100" href="<?= e(url('admin/?module=documents')) ?>"><i class="fa-solid fa-rotate me-1"></i>Reset</a></div></form>
+            <?php if ($rows): ?>
+            <div class="table-responsive"><table class="table table-bordered align-middle"><thead class="table-light"><tr><th style="width:40px">#</th><th>Dokumen</th><th>Kategori</th><th>Ukuran</th><th>Diunduh</th><th>Tanggal</th><th style="width:120px">Aksi</th></tr></thead><tbody>
+            <?php foreach ($rows as $i => $row): ?><tr><td><?= $i + 1 ?></td><td><div class="d-flex align-items-center gap-3"><i class="fa-solid <?= get_file_icon($row['file_extension']) ?> fa-xl"></i><div><strong><?= e($row['title'] ?: $row['original_name']) ?></strong><br><small class="text-muted"><?= e($row['original_name']) ?></small><?php if ($row['description']): ?><br><small class="text-muted"><?= e(mb_substr($row['description'], 0, 80)) ?><?= strlen($row['description']) > 80 ? '...' : '' ?></small><?php endif; ?></div></div></td><td><span class="badge bg-light text-dark border"><?= e($row['category']) ?></span></td><td><span class="text-nowrap"><?= format_file_size((int)$row['file_size']) ?></span></td><td><?= e((string)$row['downloads']) ?>x</td><td><small class="text-nowrap"><?= date('d M Y', strtotime($row['created_at'])) ?></small></td><td><div class="d-flex gap-1"><a class="btn btn-sm btn-outline-primary" href="<?= e(media_url($row['file_path'])) ?>" target="_blank" title="Lihat/Download"><i class="fa-solid fa-download"></i></a><a class="btn btn-sm btn-outline-secondary" href="<?= e(url('admin/?module=documents&action=form&id=' . $row['id'])) ?>" title="Edit"><i class="fa-solid fa-pen"></i></a><a class="btn btn-sm btn-outline-danger" data-confirm="Hapus dokumen <?= e($row['original_name']) ?>?" href="<?= e(url('admin/actions.php?module=documents&action=delete&id=' . $row['id'] . '&csrf_token=' . csrf_token())) ?>" title="Hapus"><i class="fa-solid fa-trash"></i></a></div></td></tr><?php endforeach; ?>
+            </tbody></table></div>
+            <p class="text-muted small">Total: <?= count($rows) ?> dokumen</p>
+            <?php else: ?>
+            <div class="card card-official p-5 text-center"><i class="fa-solid fa-folder-open fa-4x text-muted mb-3"></i><h5>Belum ada dokumen</h5><p class="mb-0">Upload dokumen seperti PDF, Word, Excel, atau file lainnya.</p><a class="btn btn-pgri mt-3" href="<?= e(url('admin/?module=documents&action=form')) ?>"><i class="fa-solid fa-upload me-1"></i>Upload Dokumen Pertama</a></div>
+            <?php endif; ?><?php
+        }
+        $output = ob_get_clean();
     } elseif ($module === 'settings') {
         $settingDefaults = ['hero_banner' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80', 'site_logo' => '', 'whatsapp_number' => '6281234567890'];
         foreach ($settingDefaults as $key => $value) { $stmt = db()->prepare('INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)'); $stmt->execute([$key, $value]); }
