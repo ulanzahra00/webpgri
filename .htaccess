@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# Redirect to index.php if not a real file/directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Security: block access to sensitive files
+<FilesMatch "\.(env|sql|md|log|sh|ps1|bat)$">
+  Deny from all
+</FilesMatch>
